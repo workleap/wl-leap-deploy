@@ -1,4 +1,4 @@
-name: Create stable release
+name: CD
 
 on:
   push:
