@@ -66,12 +66,16 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 	@for schema_version in schemas/v*/leap-deploy.schema.json; do \
 		if [ -f "$$schema_version" ]; then \
 			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
-			echo "  Uploading $$schema_version as leap-deploy.$$version.schema.json"; \
+			target_name="leap-deploy.$$version.schema.json"; \
+			echo "  Uploading $$schema_version as $$target_name"; \
 			if [ "$$CI" = "true" ]; then \
-				gh release upload $${LATEST_RELEASE} \
-					"$$schema_version#leap-deploy.$$version.schema.json"; \
+				cp "$$schema_version" "$$target_name"; \
+				gh release upload $${LATEST_RELEASE} "$$target_name"; \
+				rm "$$target_name"; \
 			else \
-				echo "    [DRY RUN] gh release upload $${LATEST_RELEASE} \"$$schema_version#leap-deploy.$$version.schema.json\""; \
+				echo "    [DRY RUN] cp \"$$schema_version\" \"$$target_name\""; \
+				echo "    [DRY RUN] gh release upload $${LATEST_RELEASE} \"$$target_name\""; \
+				echo "    [DRY RUN] rm \"$$target_name\""; \
 			fi; \
 		fi; \
 	done
