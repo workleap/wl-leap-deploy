@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -14,4 +12,4 @@ jobs:
         uses: actions/checkout@v5
       
       - name: Validate schema version patterns
-        run: make validate-schemas
+        run: make validate
