@@ -1,0 +1,23 @@
+{
+  "acr_registry_full_id": "/subscriptions/a0afde29-374e-4b1a-818a-0d8044cf8ec9/resourceGroups/idp-dev-registry-rg-87b9fd0bc003/providers/Microsoft.ContainerRegistry/registries/idp0dev0registry0acr087b9fd0bc003",
+  "acr_registry_name": "idp0dev0registry0acr087b9fd0bc003",
+  "acr_registry_resource_group": "idp-dev-registry-rg-87b9fd0bc003",
+  "acr_subscription_full_id": "/subscriptions/a0afde29-374e-4b1a-818a-0d8044cf8ec9",
+  "acr_subscription_id": "a0afde29-374e-4b1a-818a-0d8044cf8ec9",
+  "aks": {
+    "default": {
+      "cluster_id": "/subscriptions/f94a4ce0-987f-43da-ab3a-4348d602d6ac/resourceGroups/infra-dev-containers-rg-72602aa76781/providers/Microsoft.ContainerService/managedClusters/infra-dev-containers-aks-72602aa76781",
+      "cluster_name": "infra-dev-containers-aks-72602aa76781",
+      "cluster_subscription_id": "f94a4ce0-987f-43da-ab3a-4348d602d6ac",
+      "resource_group_name": "infra-dev-containers-rg-72602aa76781"
+    },
+    "eu": {
+      "cluster_id": "/subscriptions/f94a4ce0-987f-43da-ab3a-4348d602d6ac/resourceGroups/infra-dev-we-containers-1-rg-a1a3493a720f/providers/Microsoft.ContainerService/managedClusters/infra-dev-we-containers-1-aks-a1a3493a720f",
+      "cluster_name": "infra-dev-we-containers-1-aks-a1a3493a720f",
+      "cluster_subscription_id": "f94a4ce0-987f-43da-ab3a-4348d602d6ac",
+      "resource_group_name": "infra-dev-we-containers-1-rg-a1a3493a720f"
+    }
+  },
+  "keyvault_cicd_id": null,
+  "product_subscription_id": "a0afde29-374e-4b1a-818a-0d8044cf8ec9"
+}

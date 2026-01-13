@@ -1,0 +1,60 @@
+name: Leap Deploy Fold Config
+description: |
+  Folds leap-deploy.yaml configuration by merging defaults, workloads, environments, and regions.
+
+inputs:
+  file-path:
+    description: Path to the leap-deploy.yaml configuration file
+    required: true
+  environment:
+    description: Target environment (dev, staging, prod)
+    required: true
+  region:
+    description: Target region (na, eu, etc.). Optional - if omitted, workload must not have region-specific configuration
+    required: false
+    default: ""
+
+outputs:
+  folded-config:
+    description: The folded configuration in JSON format with _metadata keys filtered out at all levels
+    value: ${{ steps.fold.outputs.config }}
+  folded-config-sources:
+    description: The folded configuration formatted to show the source of each value
+    value: ${{ steps.fold.outputs.config-sources }}
+
+runs:
+  using: composite
+  steps:
+    - name: Validate configuration
+      uses: workleap/wl-github-actions/.github/actions/cd-leap-deploy-validate@main
+      with:
+        file-path: ${{ inputs.file-path }}
+    
+    - name: Fold configuration
+      id: fold
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        FILE_PATH: ${{ inputs.file-path }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        REGION: ${{ inputs.region }}
+      run: |
+        # Output 1: Run without show-sources for clean config and compact with jq -c
+        CONFIG=$("$ACTION_PATH/fold-config.sh" \
+          "$FILE_PATH" \
+          "$ENVIRONMENT" \
+          "$REGION" \
+          "false" | jq -c '.')
+        echo "config<<EOF" >> $GITHUB_OUTPUT
+        echo "$CONFIG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+        # Output 2: Run with show-sources and pipe through show-sources.sh
+        CONFIG_SOURCES=$("$ACTION_PATH/fold-config.sh" \
+          "$FILE_PATH" \
+          "$ENVIRONMENT" \
+          "$REGION" \
+          "true" | "$ACTION_PATH/show-sources.sh")
+        echo "config-sources<<EOF" >> $GITHUB_OUTPUT
+        echo "$CONFIG_SOURCES" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT

@@ -1,0 +1,22 @@
+{
+  "workloads": {
+    "leap-shop-api": {
+      "type": "api",
+      "image": {
+        "repository": "workleap-leap-shop-api",
+        "tag": "1.0.97"
+      },
+      "ingress": {
+        "fqdn": "api.idp.workleap-dev.com",
+        "pathPrefix": "/leap.shop"
+      }
+    },
+    "workleap-sample-worker": {
+      "type": "worker",
+      "image": {
+        "repository": "workleap-leap-shop-api",
+        "tag": "1.0.97"
+      }
+    }
+  }
+}

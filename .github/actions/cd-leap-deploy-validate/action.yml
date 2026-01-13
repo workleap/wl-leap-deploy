@@ -1,0 +1,22 @@
+name: Leap Deploy Validate
+description: |
+  Validates leap-deploy.yaml against the predefined schema to ensure correctness.
+
+inputs:
+  file-path:
+    description: Path to the leap-deploy.yaml configuration file
+    required: true
+  version:
+    description: Schema version to validate against
+    required: false
+    default: "latest"
+
+runs:
+  using: composite
+  steps:
+    - name: Validate leap-deploy.yaml
+      uses: dsanders11/json-schema-validate-action@v1.4.0
+      with:
+        schema: ${{ github.action_path }}/schema.json
+        files: ${{ inputs.file-path }}
+        all-errors: true
