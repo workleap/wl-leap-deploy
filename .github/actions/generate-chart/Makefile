@@ -4,7 +4,7 @@ ifndef CI
 ACR_NAME ?= $(error "ACR_NAME is not set")
 else
 # When running in CI, ACR login in performed through the CI workflow
-ACR_NAME := ""
+ACR_NAME := dummy
 endif
 
 CHART_REGISTRY := oci://$(ACR_NAME).azurecr.io/helm
@@ -39,6 +39,7 @@ $(OUTPUT_DIR)/manifests.yaml: $(OUTPUT_DIR)/chart acr/login FORCE
 .PHONY: acr/login
 acr/login:
 	@if [ "$(CI)" != "TRUE" ]; then \
+		echo "Logging into Azure Container Registry $(ACR_NAME)..."; \
 		az acr login --name $(ACR_NAME); \
 	fi
 
