@@ -32,11 +32,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Azure Login using OIDC
-        uses: workleap/wl-github-actions/.github/actions/tools-azure-login@main
+      - name: Azure CLI login
+        id: azure-login
+        continue-on-error: true
+        uses: azure/login@v2
         with:
-          variables: ${{ toJSON(vars) }}
-          subscription-id: ${{ fromJSON(vars.INFRA_CONFIG).repo_identity_subscription_id }}
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Log in to ACR using Azure CLI
         run: |
@@ -51,6 +54,5 @@ jobs:
 
       - name: Generate Helm chart and template manifests from example config
         run: make test/chart
-
-
-
+        env:
+          ACR_NAME: infra0prod0global0registry0acr0ea18c271c312
