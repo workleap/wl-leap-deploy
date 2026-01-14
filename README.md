@@ -157,7 +157,7 @@ workload-name:
 
 ## Examples
 
-See [examples/leap-deploy.yaml](examples/leap-deploy.yaml) for complete configuration examples.
+See [./schemas/v0/examples/leap-deploy.yaml](./schemas/v0/examples/leap-deploy.yaml) for complete configuration examples.
 
 ## Schema Versions
 
