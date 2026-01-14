@@ -1,6 +1,6 @@
 # Leap Deploy Generate Chart
 
-**Action Path:** `.github/actions/cd-leap-deploy-generate-chart`
+**Action Path:** `.github/actions/generate-chart`
 
 Generates a Helm chart (Chart.yaml and values.yaml) from a folded leap-deploy configuration, enabling atomic deployment of multiple workloads to Kubernetes. The generated chart creates a dependency on the [LeapApp Helm Chart](https://github.com/workleap/wl-leap-controller/tree/main/charts/leap-app) for each workload, designed to work with the [Kubernetes Leap Controller](https://github.com/workleap/wl-leap-controller/).
 
@@ -37,7 +37,7 @@ Generates a Helm chart (Chart.yaml and values.yaml) from a folded leap-deploy co
 ```yaml
 - name: Generate Helm chart
   id: generate-chart
-  uses: workleap/wl-leap-deploy/.github/actions/cd-leap-deploy-generate-chart@main
+  uses: workleap/wl-leap-deploy/.github/actions/generate-chart@main
   with:
     chart-registry: myregistry.azurecr.io
     chart-name: leap-app
@@ -80,7 +80,7 @@ jobs:
 
       - name: Generate Helm chart
         id: generate
-        uses: workleap/wl-leap-deploy/.github/actions/cd-leap-deploy-generate-chart@main
+        uses: workleap/wl-leap-deploy/.github/actions/generate-chart@main
         with:
           chart-registry: ${{ vars.CHART_REGISTRY }}
           chart-name: ${{ vars.CHART_NAME }}
@@ -109,7 +109,7 @@ jobs:
     steps:
       - name: Generate chart
         id: generate
-        uses: workleap/wl-leap-deploy/.github/actions/cd-leap-deploy-generate-chart@main
+        uses: workleap/wl-leap-deploy/.github/actions/generate-chart@main
         with:
           chart-registry: ${{ vars.CHART_REGISTRY }}
           chart-name: ${{ vars.CHART_NAME }}

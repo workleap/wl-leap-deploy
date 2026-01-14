@@ -87,6 +87,11 @@ test/fold: install-ajv  ## Validate folded configurations against the schemas
 		echo "✅ All validations passed successfully!"; \
 	fi
 
+.PHONY: test/chart
+test/chart: .github/actions/generate-chart/Makefile  ## Generate Helm chart and template manifests
+	@echo "Generating Helm chart and validating manifests..."
+	@make -C .github/actions/generate-chart all
+
 .PHONY: validate
 validate:  ## Validate schema version patterns
 	@echo "Validating schema version patterns..."

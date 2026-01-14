@@ -1,6 +1,8 @@
 SCRIPT_PATH := ./generate-chart.ps1
 
-CHART_REGISTRY := oci://infra0prod0global0registry0acr0ea18c271c312.azurecr.io/helm
+ACR_NAME ?= $(error "ACR_NAME is not set")
+
+CHART_REGISTRY := oci://$(ACR_NAME).azurecr.io/helm
 CHART_NAME := leap-app
 CHART_VERSION ?= 0.1.2
 
@@ -9,7 +11,7 @@ LEAP_DEPLOY_CONFIG_PATH := ./examples/folded-config.json
 INFRA_CONFIG_PATH := ./examples/infra.json
 HELM_RELEASE_NAME := foobar
 
-OUTPUT_DIR := ./.out
+OUTPUT_DIR := ./out
 
 all: manifests
 
@@ -17,11 +19,18 @@ FORCE:
 
 $(OUTPUT_DIR)/chart:
 	@mkdir -p $(OUTPUT_DIR)
-	@$(SCRIPT_PATH) $(CHART_REGISTRY) $(CHART_NAME) $(CHART_VERSION) $(PRODUCT_NAME) $(LEAP_DEPLOY_CONFIG_PATH) $(INFRA_CONFIG_PATH) $@
+	@GITHUB_SERVER_URL="https://github.com" GITHUB_REPOSITORY="workleap/wl-leap-shop" \
+	$(SCRIPT_PATH) $(CHART_REGISTRY) $(CHART_NAME) $(CHART_VERSION) $(PRODUCT_NAME) $(LEAP_DEPLOY_CONFIG_PATH) $(INFRA_CONFIG_PATH) $@
 
-$(OUTPUT_DIR)/manifests.yaml: $(OUTPUT_DIR)/chart FORCE
+$(OUTPUT_DIR)/manifests.yaml: $(OUTPUT_DIR)/chart acr/login FORCE
 	@helm dependency build $<
 	@helm template $(HELM_RELEASE_NAME) $< --values $</values.yaml > $@
+
+.PHONY: acr/login
+acr/login:
+	@if [ "$(CI)" != "TRUE" ]; then \
+		az acr login --name $(ACR_NAME); \
+	fi
 
 .PHONY: chart
 chart: $(OUTPUT_DIR)/chart

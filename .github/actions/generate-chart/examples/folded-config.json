@@ -1,9 +1,9 @@
 {
   "workloads": {
-    "leap-shop-api": {
+    "demo-api": {
       "type": "api",
       "image": {
-        "repository": "workleap-leap-shop-api",
+        "repository": "workleap-demo-api",
         "tag": "1.0.97"
       },
       "ingress": {
@@ -14,7 +14,7 @@
     "workleap-sample-worker": {
       "type": "worker",
       "image": {
-        "repository": "workleap-leap-shop-api",
+        "repository": "workleap-demo-api",
         "tag": "1.0.97"
       }
     }
