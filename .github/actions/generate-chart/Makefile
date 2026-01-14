@@ -38,7 +38,7 @@ $(OUTPUT_DIR)/manifests.yaml: $(OUTPUT_DIR)/chart acr/login FORCE
 
 .PHONY: acr/login
 acr/login:
-	@if [ -z "$$(CI)" ]; then \
+	@if [ -z "$(CI)" ]; then \
 		echo "Logging into Azure Container Registry $(ACR_NAME)..."; \
 		az acr login --name $(ACR_NAME); \
 	fi
