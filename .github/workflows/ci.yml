@@ -33,7 +33,7 @@ jobs:
   validate-chart-generation:
     runs-on: [idp]
     env:
-      ACR_NAME: infra0prod0global0registry0acr0ea18c271c312
+      ACR_NAME: ${{ vars.WORKLEAP_GLOBAL_CONTAINER_REGISTRY_NAME }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
