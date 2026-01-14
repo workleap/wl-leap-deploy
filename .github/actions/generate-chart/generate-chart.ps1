@@ -101,7 +101,7 @@ try {
     }
 
     # Use the provided chart configuration parameters
-    Write-Host "Using as workload chart: $ChartRegistry/$ChartName\:$ChartVersion"
+    Write-Host "Using as workload chart: ${ChartRegistry}/${ChartName}:${ChartVersion}"
     # Validate that workloads exist
     if (-not $foldedConfig.PSObject.Properties['workloads']) {
         Write-Error "Folded config must contain 'workloads' property"
