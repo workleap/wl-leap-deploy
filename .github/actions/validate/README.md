@@ -55,7 +55,7 @@ The action validates the following aspects of your `leap-deploy.yaml`:
 
 See [examples/leap-deploy.yaml](../.github/actions/validate/examples/leap-deploy.yaml) for a complete configuration example.
 
-For detailed validation rules, refer to the [leap-deploy.schema.json](../../../schemas/v0/leap-deploy.schema.json) JSON Schema definition.
+For detailed validation rules, refer to the [leap-deploy.schema.json](./schemas/v0/leap-deploy.schema.json) JSON Schema definition.
 
 ## Troubleshooting
 
