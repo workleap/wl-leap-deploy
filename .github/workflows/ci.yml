@@ -15,4 +15,7 @@ jobs:
         run: make validate
 
       - name: Validate examples against schemas
-        run: make test
+        run: make test/examples
+
+      - name: Fold configurations and validate results against schemas
+        run: make test/fold

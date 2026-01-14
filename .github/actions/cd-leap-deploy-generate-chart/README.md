@@ -72,7 +72,7 @@ jobs:
 
       - name: Fold leap-deploy configuration
         id: fold
-        uses: workleap/wl-leap-deploy/.github/actions/cd-leap-deploy-fold-config@main
+        uses: workleap/wl-leap-deploy/.github/actions/fold-config@main
         with:
           file-path: devops/leap-deploy.yaml
           environment: dev
@@ -201,7 +201,7 @@ worker-workload:
 
 ### leap-deploy-config Format
 
-Must be a folded configuration JSON (output from cd-leap-deploy-fold-config):
+Must be a folded configuration JSON (output from fold-config):
 
 ```json
 {

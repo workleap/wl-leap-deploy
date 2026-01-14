@@ -1,6 +1,6 @@
 # Leap Deploy Fold Config
 
-**Action Path:** `.github/actions/cd-leap-deploy-fold-config`
+**Action Path:** `.github/actions/fold-config`
 
 Processes `leap-deploy.yaml` configuration files by merging defaults, workload settings, environment overrides, and region-specific configurations into complete deployment configurations for a target environment and region.
 
@@ -33,7 +33,7 @@ Processes `leap-deploy.yaml` configuration files by merging defaults, workload s
 ```yaml
 - name: Fold deployment configuration
   id: fold
-  uses: workleap/wl-leap-deploy/.github/actions/cd-leap-deploy-fold-config@main
+  uses: workleap/wl-leap-deploy/.github/actions/fold-config@main
   with:
     file-path: ./devops/leap-deploy.yaml
     environment: dev
@@ -57,7 +57,7 @@ jobs:
 
       - name: Fold configuration for production
         id: fold
-        uses: workleap/wl-leap-deploy/.github/actions/cd-leap-deploy-fold-config@main
+        uses: workleap/wl-leap-deploy/.github/actions/fold-config@main
         with:
           file-path: devops/leap-deploy.yaml
           environment: prod

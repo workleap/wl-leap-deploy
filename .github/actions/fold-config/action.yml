@@ -1,6 +1,6 @@
 name: Leap Deploy Fold Config
 description: |
-  Folds leap-deploy.yaml configuration by merging defaults, workloads, environments, and regions.
+  Folds leap-deploy.yaml configuration by merging workload configs for the specified environment and region.
 
 inputs:
   file-path:
@@ -16,17 +16,17 @@ inputs:
 
 outputs:
   folded-config:
-    description: The folded configuration in JSON format with _metadata keys filtered out at all levels
+    description: The folded workload configuration in JSON format
     value: ${{ steps.fold.outputs.config }}
   folded-config-sources:
-    description: The folded configuration formatted to show the source of each value
     value: ${{ steps.fold.outputs.config-sources }}
+    description: The folded workload configuration formatted to show the source of each value
 
 runs:
   using: composite
   steps:
     - name: Validate configuration
-      uses: workleap/wl-leap-deploy/.github/actions/cvalidate@main
+      uses: workleap/wl-leap-deploy/.github/actions/validate@main
       with:
         file-path: ${{ inputs.file-path }}
     

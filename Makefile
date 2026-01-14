@@ -3,6 +3,11 @@ SCHEMA_FILE_NAME := leap-deploy.schema.json
 EXAMPLES_DIRECTORY_NAME := examples
 OUT_DIR := out
 
+FOLD_SCRIPT := .github/actions/fold-config/fold-config.sh
+FOLD_TEST_ENVIRONMENTS := dev staging prod
+FOLD_TEST_REGIONS := na eu
+FOLD_TEST_OUTPUT := $(OUT_DIR)/folded
+
 AJV_BINARY := ajv
 AJV_VERSION := 5.0.0
 
@@ -12,15 +17,11 @@ all: validate
 install-ajv:
 	@which $(AJV_BINARY) > /dev/null 2>&1 || (echo "ajv not found, installing..." && npm install -g ajv-cli@$(AJV_VERSION))
 
-
-# 	@$(AJV_BINARY) validate -s $(SCHEMA_FILE) -d $<
-
-.PHONY: test
-test: install-ajv  ## Validate example files against the schemas
-	@mkdir -p $(OUT_DIR)
+.PHONY: test/examples
+test/examples: install-ajv  ## Validate example files against the schemas
 	@echo "Testing examples against schemas..."
 	@has_errors=0; \
-	for schema in schemas/v*/$(SCHEMA_FILE_NAME); do \
+	for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema" ]; then \
 			version_dir=$$(echo "$$schema" | cut -d'/' -f2); \
 			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
@@ -40,10 +41,56 @@ test: install-ajv  ## Validate example files against the schemas
 		echo "✅ All validations passed successfully!"; \
 	fi
 
+.PHONY: test/fold
+test/fold: install-ajv  ## Validate folded configurations against the schemas
+	@mkdir -p $(FOLD_TEST_OUTPUT)
+	@echo "Testing folding of configurations and results against schemas..."
+	@has_errors=0; \
+	for example in $(SCHEMAS_DIRECTORY)/v*/$(EXAMPLES_DIRECTORY_NAME)/*.yaml; do \
+		if [ -f "$$example" ]; then \
+			version_dir=$$(echo "$$example" | cut -d'/' -f2); \
+			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
+			examples_dir="$(SCHEMAS_DIRECTORY)/$$version_dir/$(EXAMPLES_DIRECTORY_NAME)"; \
+			schema="$(SCHEMAS_DIRECTORY)/$$version_dir/$(SCHEMA_FILE_NAME)"; \
+		for env in $(FOLD_TEST_ENVIRONMENTS); do \
+			out_folded="$(FOLD_TEST_OUTPUT)/$$version_number-$$env.json"; \
+			echo "Folding $$example for environment $$env (no region)..."; \
+			if ! $(FOLD_SCRIPT) "$$example" $$env "" false | jq . > "$$out_folded"; then \
+				has_errors=1; \
+			else \
+				echo "Validating folded output against $$schema..."; \
+				if ! $(AJV_BINARY) validate -s $$schema -d "$$out_folded" --all-errors --verbose; then \
+					has_errors=1; \
+				fi; \
+			fi; \
+			for region in $(FOLD_TEST_REGIONS); do \
+				out_folded="$(FOLD_TEST_OUTPUT)/$$version_number-$$env-$$region.json"; \
+				echo "Folding $$example for environment $$env and region $$region..."; \
+				if ! $(FOLD_SCRIPT) "$$example" $$env $$region false | jq . > "$$out_folded"; then \
+					has_errors=1; \
+				else \
+					echo "Validating folded output against $$schema..."; \
+					if ! $(AJV_BINARY) validate -s $$schema -d "$$out_folded" --all-errors --verbose; then \
+						has_errors=1; \
+					fi; \
+				fi; \
+			done; \
+			done; \
+		fi; \
+	done; \
+	if [ $$has_errors -eq 1 ]; then \
+		echo ""; \
+		echo "❌ Validation failed for one or more schemas"; \
+		exit 1; \
+	else \
+		echo ""; \
+		echo "✅ All validations passed successfully!"; \
+	fi
+
 .PHONY: validate
 validate:  ## Validate schema version patterns
 	@echo "Validating schema version patterns..."
-	@for schema in schemas/v*/$(SCHEMA_FILE_NAME); do \
+	@for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema" ]; then \
 			version_dir=$$(echo "$$schema" | cut -d'/' -f2); \
 			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
@@ -89,7 +136,7 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 		echo "🏠 Running locally - commands will be echoed but not executed"; \
 	fi
 	@echo "Uploading artifacts to release $${LATEST_RELEASE}..."
-	@for schema_version in schemas/v*/$(SCHEMA_FILE_NAME); do \
+	@for schema_version in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema_version" ]; then \
 			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
 			target_name="leap-deploy.$$version.schema.json"; \
@@ -106,3 +153,10 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 		fi; \
 	done
 	@echo "✅ All artifacts uploaded successfully!"
+
+.PHONY: test
+test: test/examples test/fold ## Run all tests
+
+.PHONY: clean
+clean:
+	@rm -rf $(OUT_DIR)
