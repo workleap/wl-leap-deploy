@@ -6,7 +6,7 @@ on:
 
 jobs:
   validate-schemas:
-    runs-on: [idp]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -18,7 +18,7 @@ jobs:
         run: make test/examples
 
   validate-config-folding:
-    runs-on: [idp]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
