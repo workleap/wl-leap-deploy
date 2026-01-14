@@ -106,6 +106,8 @@ workloads:
   # Background worker with simpler configuration (inherits most from defaults)
   workleap-sample-worker:
     
+    type: worker
+    
     annotations:
       apps.workleap.com/flavor: worker
     
@@ -134,6 +136,8 @@ workloads:
   # --------------------------------------------------------------------------
   # Example of a workload that uses mostly defaults with minimal overrides
   workleap-minimal-service:
+    
+    type: api
     
     annotations:
       apps.workleap.com/flavor: service

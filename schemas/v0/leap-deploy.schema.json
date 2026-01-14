@@ -92,6 +92,65 @@
     },
     "workloadConfig": {
       "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["api", "worker"],
+          "description": "Workload type - either 'api' for API services or 'worker' for background workers"
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Kubernetes annotations"
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Kubernetes labels"
+        },
+        "replicas": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of replicas"
+        },
+        "autoscaling": {
+          "$ref": "#/definitions/autoscalingConfig"
+        },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "requests": {
+              "type": "object",
+              "properties": {
+                "cpu": {
+                  "type": "string",
+                  "pattern": "^[0-9]+(m|\\.[0-9]+)?$"
+                },
+                "memory": {
+                  "type": "string",
+                  "pattern": "^[0-9]+(Mi|Gi|Ki)$"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "image": {
+          "$ref": "#/definitions/imageConfig"
+        },
+        "ingress": {
+          "$ref": "#/definitions/ingressConfig"
+        }
+      }
+    },
+    "workloadConfigOverride": {
+      "type": "object",
       "properties": {
         "type": {
           "type": "string",
@@ -160,7 +219,7 @@
               "type": "object",
               "description": "Environment-specific overrides within a region",
               "additionalProperties": {
-                "$ref": "#/definitions/workloadConfig"
+                "$ref": "#/definitions/workloadConfigOverride"
               }
             }
           }
@@ -179,7 +238,23 @@
               "type": "object",
               "description": "Region-specific overrides (na, eu, etc.)",
               "additionalProperties": {
-                "$ref": "#/definitions/workloadConfigWithEnvironmentOverrides"
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/workloadConfigOverride"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "environments": {
+                        "type": "object",
+                        "description": "Environment-specific overrides within a region",
+                        "additionalProperties": {
+                          "$ref": "#/definitions/workloadConfigOverride"
+                        }
+                      }
+                    }
+                  }
+                ]
               }
             }
           }
