@@ -126,7 +126,6 @@ The `folded-config-sources` output shows where each value originated for debuggi
 
 - The action automatically validates your configuration first
 - Fix any schema validation errors reported
-- See the [cvalidate](cvalidate.md) action documentation
 
 **Region parameter issues:**
 

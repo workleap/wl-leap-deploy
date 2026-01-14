@@ -53,7 +53,7 @@ The action validates the following aspects of your `leap-deploy.yaml`:
 - Ingress and network configurations
 - Proper structure and data types
 
-See [examples/leap-deploy.yaml](../.github/actions/validate/examples/leap-deploy.yaml) for a complete configuration example.
+See [examples/leap-deploy.yaml](./schemas/v0/examples/leap-deploy.yaml) for a complete configuration example.
 
 For detailed validation rules, refer to the [leap-deploy.schema.json](./schemas/v0/leap-deploy.schema.json) JSON Schema definition.
 

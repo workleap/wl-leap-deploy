@@ -117,7 +117,7 @@ try {
         $dependencies += [PSCustomObject]@{
             name       = $ChartName
             version    = $ChartVersion
-            repository = $chartRegistry
+            repository = $ChartRegistry
             alias      = $workloadName
         }
     }
