@@ -28,6 +28,11 @@ $(OUTPUT_DIR)/chart:
 	$(SCRIPT_PATH) $(CHART_REGISTRY) $(CHART_NAME) $(CHART_VERSION) $(PRODUCT_NAME) $(LEAP_DEPLOY_CONFIG_PATH) $(INFRA_CONFIG_PATH) $@
 
 $(OUTPUT_DIR)/manifests.yaml: $(OUTPUT_DIR)/chart acr/login FORCE
+	@mkdir -p $(OUTPUT_DIR)
+	@helm version
+	@echo "Generating manifests from Helm chart..."
+	@cat $</Chart.yaml
+	@cat $</values.yaml
 	@helm dependency build $<
 	@helm template $(HELM_RELEASE_NAME) $< --values $</values.yaml > $@
 
