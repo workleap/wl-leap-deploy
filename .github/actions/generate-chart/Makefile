@@ -1,12 +1,6 @@
 SCRIPT_PATH := ./generate-chart.ps1
 
-ifndef CI
 ACR_NAME ?= $(error "ACR_NAME is not set")
-else
-# When running in CI, ACR login in performed through the CI workflow
-ACR_NAME := ""
-endif
-
 CHART_REGISTRY := oci://$(ACR_NAME).azurecr.io/helm
 CHART_NAME := leap-app
 CHART_VERSION ?= 0.1.2
