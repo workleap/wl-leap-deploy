@@ -64,6 +64,11 @@ $ErrorActionPreference = "Stop"
 # Module version constants
 $POWERSHELL_YAML_VERSION = "0.4.12"
 
+# Workleap label and annotation constants
+$LABEL_WORKLEAP_TYPE = "app.workleap.com/type"
+$LABEL_WORKLEAP_PRODUCT = "app.workleap.com/product"
+$ANNOTATION_WORKLEAP_REPO = "apps.workleap.com/repo"
+
 try {
     # Ensure powershell-yaml module is available
     if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
@@ -207,7 +212,8 @@ try {
 
         # Build commonLabels (merge workload type with custom labels)
         $commonLabels = [PSCustomObject]@{
-            'app.workleap.com/type' = $workload.type
+            $LABEL_WORKLEAP_TYPE = $workload.type
+            $LABEL_WORKLEAP_PRODUCT = $ProductName
         }
         if ($workload.PSObject.Properties['labels']) {
             foreach ($label in $workload.labels.PSObject.Properties) {
@@ -218,7 +224,7 @@ try {
         # Build commonAnnotations (merge repo URL with custom annotations)
         $commonAnnotations = [PSCustomObject]@{}
         if ($repoUrl) {
-            $commonAnnotations | Add-Member -NotePropertyName 'apps.workleap.com/repo' -NotePropertyValue $repoUrl
+            $commonAnnotations | Add-Member -NotePropertyName $ANNOTATION_WORKLEAP_REPO -NotePropertyValue $repoUrl
         }
         if ($workload.PSObject.Properties['annotations']) {
             foreach ($annotation in $workload.annotations.PSObject.Properties) {
