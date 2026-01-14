@@ -56,8 +56,9 @@ jobs:
             --password "$PASSWORD"
         env:
           ACR_NAME: infra0prod0global0registry0acr0ea18c271c312
+          DOCKER_COMMAND: podman
 
       - name: Generate Helm chart and template manifests from example config
-        run: make test/chart
+        run: ACR_NAME=$ACR_NAME make test/chart
         env:
           ACR_NAME: infra0prod0global0registry0acr0ea18c271c312
