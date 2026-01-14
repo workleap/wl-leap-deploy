@@ -47,6 +47,7 @@ jobs:
 
       - name: Log in to ACR using Azure CLI
         run: |
+          echo "$env:ACR_NAME"
           az acr login --name "$env:ACR_NAME"
           $PASSWORD = az acr login --name "$env:ACR_NAME" --expose-token --output tsv --query accessToken | Out-String
           $PASSWORD = $PASSWORD.Trim()
