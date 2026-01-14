@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   validate-schemas:
     runs-on: ubuntu-latest
@@ -13,3 +17,47 @@ jobs:
       
       - name: Validate schema version patterns
         run: make validate
+
+      - name: Validate examples against schemas
+        run: make test/examples
+
+  validate-config-folding:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Fold configurations and validate results against schemas
+        run: make test/fold
+
+  validate-chart-generation:
+    runs-on: [idp]
+    env:
+      ACR_NAME: ${{ vars.WORKLEAP_GLOBAL_CONTAINER_REGISTRY_NAME }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Azure CLI login
+        id: azure-login
+        continue-on-error: true
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Log in to ACR using Azure CLI
+        shell: pwsh
+        run: |
+          az acr login --name "$env:ACR_NAME"
+          $PASSWORD = az acr login --name "$env:ACR_NAME" --expose-token --output tsv --query accessToken | Out-String
+          $PASSWORD = $PASSWORD.Trim()
+          helm registry login "$($env:ACR_NAME).azurecr.io" `
+            --username "00000000-0000-0000-0000-000000000000" `
+            --password "$PASSWORD"
+        env:
+          DOCKER_COMMAND: podman
+
+      - name: Generate Helm chart and template manifests from example config
+        run: ACR_NAME=${ACR_NAME} make test/chart
