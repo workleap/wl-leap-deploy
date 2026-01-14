@@ -13,3 +13,6 @@ jobs:
       
       - name: Validate schema version patterns
         run: make validate
+
+      - name: Validate examples against schemas
+        run: make test

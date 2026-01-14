@@ -9,7 +9,7 @@ inputs:
   version:
     description: Schema version to validate against
     required: false
-    default: "latest"
+    default: "v0"
 
 runs:
   using: composite
@@ -17,6 +17,6 @@ runs:
     - name: Validate leap-deploy.yaml
       uses: dsanders11/json-schema-validate-action@v1.4.0
       with:
-        schema: ${{ github.action_path }}/schema.json
+        schema: ${{ github.action_path }}/schemas/${{ inputs.version }}/leap-deploy-schema.json
         files: ${{ inputs.file-path }}
         all-errors: true

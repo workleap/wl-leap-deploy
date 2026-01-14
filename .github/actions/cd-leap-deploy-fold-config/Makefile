@@ -1,6 +1,6 @@
 OUT_DIR := out
 FILE_PATH := ./examples/leap-deploy.yaml
-SCHEMA_PATH := ../cd-leap-deploy-validate/schema.json
+SCHEMA_PATH := ../cvalidate/schema.json
 ENVIRONMENT := dev
 REGION := na
 SHOW_SOURCE ?= false

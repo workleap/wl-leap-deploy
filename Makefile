@@ -1,5 +1,7 @@
 SCHEMAS_DIRECTORY := schemas
-SCHEMA_FILE := $(SCHEMAS_DIRECTORY)/v0/leap-deploy.schema.json
+SCHEMA_FILE_NAME := leap-deploy.schema.json
+EXAMPLES_DIRECTORY_NAME := examples
+OUT_DIR := out
 
 AJV_BINARY := ajv
 AJV_VERSION := 5.0.0
@@ -10,14 +12,38 @@ all: validate
 install-ajv:
 	@which $(AJV_BINARY) > /dev/null 2>&1 || (echo "ajv not found, installing..." && npm install -g ajv-cli@$(AJV_VERSION))
 
+
+# 	@$(AJV_BINARY) validate -s $(SCHEMA_FILE) -d $<
+
 .PHONY: test
-test: examples/leap-deploy.yaml install-ajv  ## Validate example files against the schema
-	@$(AJV_BINARY) validate -s $(SCHEMA_FILE) -d $<
+test: install-ajv  ## Validate example files against the schemas
+	@mkdir -p $(OUT_DIR)
+	@echo "Testing examples against schemas..."
+	@has_errors=0; \
+	for schema in schemas/v*/$(SCHEMA_FILE_NAME); do \
+		if [ -f "$$schema" ]; then \
+			version_dir=$$(echo "$$schema" | cut -d'/' -f2); \
+			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
+			examples_dir="$(SCHEMAS_DIRECTORY)/$$version_dir/$(EXAMPLES_DIRECTORY_NAME)"; \
+			echo "Validating examples in $$examples_dir against $$schema..."; \
+			if ! $(AJV_BINARY) validate -s $$schema -d "$$examples_dir/*" --all-errors --verbose; then \
+				has_errors=1; \
+			fi; \
+		fi; \
+	done; \
+	if [ $$has_errors -eq 1 ]; then \
+		echo ""; \
+		echo "❌ Validation failed for one or more schemas"; \
+		exit 1; \
+	else \
+		echo ""; \
+		echo "✅ All validations passed successfully!"; \
+	fi
 
 .PHONY: validate
 validate:  ## Validate schema version patterns
 	@echo "Validating schema version patterns..."
-	@for schema in schemas/v*/leap-deploy.schema.json; do \
+	@for schema in schemas/v*/$(SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema" ]; then \
 			version_dir=$$(echo "$$schema" | cut -d'/' -f2); \
 			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
@@ -63,7 +89,7 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 		echo "🏠 Running locally - commands will be echoed but not executed"; \
 	fi
 	@echo "Uploading artifacts to release $${LATEST_RELEASE}..."
-	@for schema_version in schemas/v*/leap-deploy.schema.json; do \
+	@for schema_version in schemas/v*/$(SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema_version" ]; then \
 			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
 			target_name="leap-deploy.$$version.schema.json"; \

@@ -26,7 +26,7 @@ runs:
   using: composite
   steps:
     - name: Validate configuration
-      uses: workleap/wl-github-actions/.github/actions/cd-leap-deploy-validate@main
+      uses: workleap/wl-leap-deploy/.github/actions/cvalidate@main
       with:
         file-path: ${{ inputs.file-path }}
     

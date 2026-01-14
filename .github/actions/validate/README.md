@@ -1,6 +1,6 @@
 # Leap Deploy Validate
 
-**Action Path:** `.github/actions/cd-leap-deploy-validate`
+**Action Path:** `.github/actions/validate`
 
 Validates `leap-deploy.yaml` configuration files against the leap-deploy JSON schema to ensure correctness before deployment.
 
@@ -15,6 +15,7 @@ Validates `leap-deploy.yaml` configuration files against the leap-deploy JSON sc
 | Input       | Required | Default | Description                                       |
 | ----------- | -------- | ------- | ------------------------------------------------- |
 | `file-path` | Yes      | -       | Path to the `leap-deploy.yaml` configuration file |
+| `version`   | No       | `v0`    | Schema version to validate against                |
 
 ## Usage
 
@@ -22,7 +23,7 @@ Validates `leap-deploy.yaml` configuration files against the leap-deploy JSON sc
 
 ```yaml
 - name: Validate deployment configuration
-  uses: workleap/wl-github-actions/.github/actions/cd-leap-deploy-validate@main
+  uses: workleap/wl-leap-deploy/.github/actions/validate@main
   with:
     file-path: ./devops/leap-deploy.yaml
 ```
@@ -37,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Validate leap-deploy.yaml
-        uses: workleap/wl-github-actions/.github/actions/cd-leap-deploy-validate@main
+        uses: workleap/wl-leap-deploy/.github/actions/validate@main
         with:
           file-path: devops/leap-deploy.yaml
 ```
@@ -52,7 +53,7 @@ The action validates the following aspects of your `leap-deploy.yaml`:
 - Ingress and network configurations
 - Proper structure and data types
 
-See [examples/leap-deploy.yaml](../.github/actions/cd-leap-deploy-validate/examples/leap-deploy.yaml) for a complete configuration example.
+See [examples/leap-deploy.yaml](../.github/actions/validate/examples/leap-deploy.yaml) for a complete configuration example.
 
 For detailed validation rules, refer to the [leap-deploy.schema.json](../../../schemas/v0/leap-deploy.schema.json) JSON Schema definition.
 

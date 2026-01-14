@@ -22,7 +22,7 @@
 # ==============================================================================
 # Unique identifier for this deployment configuration - Required to uniquely identify
 # the set of workloads being deployed.
-version: "1"
+version: "0"
 id: foobar
 
 # ==============================================================================

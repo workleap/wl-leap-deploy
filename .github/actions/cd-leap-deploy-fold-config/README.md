@@ -33,7 +33,7 @@ Processes `leap-deploy.yaml` configuration files by merging defaults, workload s
 ```yaml
 - name: Fold deployment configuration
   id: fold
-  uses: workleap/wl-github-actions/.github/actions/cd-leap-deploy-fold-config@main
+  uses: workleap/wl-leap-deploy/.github/actions/cd-leap-deploy-fold-config@main
   with:
     file-path: ./devops/leap-deploy.yaml
     environment: dev
@@ -57,7 +57,7 @@ jobs:
 
       - name: Fold configuration for production
         id: fold
-        uses: workleap/wl-github-actions/.github/actions/cd-leap-deploy-fold-config@main
+        uses: workleap/wl-leap-deploy/.github/actions/cd-leap-deploy-fold-config@main
         with:
           file-path: devops/leap-deploy.yaml
           environment: prod
@@ -126,7 +126,7 @@ The `folded-config-sources` output shows where each value originated for debuggi
 
 - The action automatically validates your configuration first
 - Fix any schema validation errors reported
-- See the [cd-leap-deploy-validate](cd-leap-deploy-validate.md) action documentation
+- See the [cvalidate](cvalidate.md) action documentation
 
 **Region parameter issues:**
 
