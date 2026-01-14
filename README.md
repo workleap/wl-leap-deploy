@@ -1,5 +1,9 @@
 # Leap Deploy
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![CI](https://github.com/workleap/wl-leap-deploy/actions/workflows/ci.yml/badge.svg)](https://github.com/workleap/wl-leap-deploy/actions/workflows/ci.yml)
+[![CD](https://github.com/workleap/wl-leap-deploy/actions/workflows/cd.yml/badge.svg)](https://github.com/workleap/wl-leap-deploy/actions/workflows/cd.yml)
+
 A declarative deployment configuration system for managing workloads across multiple environments and regions.
 
 ## Overview
