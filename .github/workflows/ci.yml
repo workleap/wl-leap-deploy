@@ -17,8 +17,20 @@ jobs:
       - name: Validate examples against schemas
         run: make test/examples
 
+  validate-config-folding:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
       - name: Fold configurations and validate results against schemas
         run: make test/fold
+
+  validate-chart-generation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
 
       - name: Generate Helm chart and template manifests from example config
         run: make test/chart
