@@ -15,7 +15,11 @@
       "description": "Unique identifier for this deployment configuration"
     },
     "workloads": {
-      "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/definitions/foldedWorkloadConfig"
+      "additionalProperties": {
+        "allOf": [
+          { "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/definitions/foldedWorkloadConfig" }
+        ]
+      }
     }
   },
   "required": ["version", "id", "workloads"],

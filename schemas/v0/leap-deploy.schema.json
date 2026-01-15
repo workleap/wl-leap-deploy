@@ -106,12 +106,10 @@
     "foldedWorkloadConfig": {
       "description": "Resulting Workload configuration with all overrides applied for the target environment and region - includes required fields",
       "type": "object",
-      "additionalProperties": {
-        "allOf": [
-          { "$ref": "#/definitions/workloadConfig" },
-          { "$ref": "#/definitions/foldedWorkloadConfigConstraints" }
-        ]
-      }
+      "allOf": [
+        { "$ref": "#/definitions/workloadConfig" },
+        { "$ref": "#/definitions/foldedWorkloadConfigConstraints" }
+      ]
     },
     "workloadConfig": {
       "type": "object",
