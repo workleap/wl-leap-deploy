@@ -1,3 +1,7 @@
+.DEFAULT_GOAL := all
+SHELL := /bin/bash
+.SHELLFLAGS := -euo pipefail -c
+	
 SCHEMAS_DIRECTORY := schemas
 SCHEMA_FILE_NAME := leap-deploy.schema.json
 FOLDED_SCHEMA_FILE_NAME := leap-deploy-folded.schema.json
@@ -185,3 +189,8 @@ test: test/examples test/fold ## Run all tests
 .PHONY: clean
 clean:
 	@rm -rf $(OUT_DIR)
+
+.PHONY: help
+help:  ## Display this help message
+	@echo "Available targets:"
+	@grep -E '^[a-zA-Z_/-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'

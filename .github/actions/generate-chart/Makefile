@@ -1,3 +1,7 @@
+.DEFAULT_GOAL := all
+SHELL := /bin/bash
+.SHELLFLAGS := -euo pipefail -c
+
 SCRIPT_PATH := ./generate-chart.ps1
 
 # Load .env file if it exists (for local development)
@@ -62,12 +66,17 @@ acr/login:  ## Log in to Azure Container Registry if not in CI
 		az acr login --name $(ACR_NAME); \
 	fi
 
-.PHONY: chart
+.PHONY: chart  ## Create Helm chart from examples config files
 chart: $(OUTPUT_DIR)/chart
 	
-.PHONY: manifests
+.PHONY: manifests  ## Generate manifests from Helm chart
 manifests: $(OUTPUT_DIR)/manifests.yaml
 
 .PHONY: clean
 clean:
 	@rm -rf $(OUTPUT_DIR)
+
+.PHONY: help
+help:  ## Display this help message
+	@echo "Available targets:"
+	@grep -hE '^[a-zA-Z_/-]+:.*?##|^\.PHONY: [a-zA-Z_/-]+.*?##' $(MAKEFILE_LIST) | sed 's/^\.PHONY: \([^ ]*\)  */\1:  /' | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
