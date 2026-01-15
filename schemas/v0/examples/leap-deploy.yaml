@@ -122,7 +122,7 @@ workloads:
         replicas: 1
         autoscaling:
           horizontal:
-            enable: false
+            enabled: false
       
       prod:
         replicas: 3

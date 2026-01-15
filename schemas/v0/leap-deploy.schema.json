@@ -77,7 +77,7 @@
         "vertical": {
           "type": "object",
           "properties": {
-            "enable": {
+            "enabled": {
               "type": "boolean"
             }
           },
@@ -86,7 +86,7 @@
         "horizontal": {
           "type": "object",
           "properties": {
-            "enable": {
+            "enabled": {
               "type": "boolean"
             },
             "minReplicas": {
