@@ -9,8 +9,8 @@ FOLD_TEST_ENVIRONMENTS := dev staging prod
 FOLD_TEST_REGIONS := na eu
 FOLD_TEST_OUTPUT := $(OUT_DIR)/folded
 
-AJV_BINARY := npx ajv-cli
 AJV_VERSION := 5.0.0
+AJV_BINARY := npx ajv-cli@$(AJV_VERSION)
 
 # GitHub repository info (inferred from environment or defaults for local)
 GITHUB_REPOSITORY ?= workleap/wl-leap-deploy
