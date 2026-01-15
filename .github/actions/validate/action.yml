@@ -10,27 +10,17 @@ inputs:
     description: Schema version to validate against
     required: false
     default: "v0"
-  schema-type:
-    description: "Schema type: 'input' for leap-deploy.yaml, 'folded' for folded configs"
+  schema-file:
+    description: "Schema filename to validate against (e.g., leap-deploy.schema.json or leap-deploy-folded.schema.json)"
     required: false
-    default: "input"
+    default: "leap-deploy.schema.json"
 
 runs:
   using: composite
   steps:
-    - name: Determine schema file
-      id: schema
-      shell: bash
-      run: |
-        if [ "${{ inputs.schema-type }}" = "folded" ]; then
-          echo "file=leap-deploy-folded.schema.json" >> $GITHUB_OUTPUT
-        else
-          echo "file=leap-deploy.schema.json" >> $GITHUB_OUTPUT
-        fi
-
     - name: Validate configuration
       uses: dsanders11/json-schema-validate-action@v1.4.0
       with:
-        schema: ${{ github.action_path }}/schemas/${{ inputs.version }}/${{ steps.schema.outputs.file }}
+        schema: ${{ github.action_path }}/schemas/${{ inputs.version }}/${{ inputs.schema-file }}
         files: ${{ inputs.file-path }}
         all-errors: true

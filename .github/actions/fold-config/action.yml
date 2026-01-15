@@ -69,4 +69,4 @@ runs:
       uses: workleap/wl-leap-deploy/.github/actions/validate@main
       with:
         file-path: ${{ steps.fold.outputs.folded-temp-file }}
-        schema-type: folded
+        schema-file: leap-deploy-folded.schema.json
