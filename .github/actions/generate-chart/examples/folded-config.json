@@ -1,4 +1,6 @@
 {
+  "version": "0",
+  "id": "foobar",
   "workloads": {
     "demo-api": {
       "type": "api",

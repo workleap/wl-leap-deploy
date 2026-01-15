@@ -25,7 +25,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Validate configuration
+    - name: Validate input configuration
       uses: workleap/wl-leap-deploy/.github/actions/validate@main
       with:
         file-path: ${{ inputs.file-path }}
@@ -45,6 +45,12 @@ runs:
           "$ENVIRONMENT" \
           "$REGION" \
           "false" | jq -c '.')
+        
+        # Write folded config to temp file for validation
+        FOLDED_TEMP=$(mktemp --suffix=.json)
+        echo "$CONFIG" > "$FOLDED_TEMP"
+        echo "folded-temp-file=$FOLDED_TEMP" >> $GITHUB_OUTPUT
+        
         echo "config<<EOF" >> $GITHUB_OUTPUT
         echo "$CONFIG" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
@@ -58,3 +64,9 @@ runs:
         echo "config-sources<<EOF" >> $GITHUB_OUTPUT
         echo "$CONFIG_SOURCES" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Validate folded configuration
+      uses: workleap/wl-leap-deploy/.github/actions/validate@main
+      with:
+        file-path: ${{ steps.fold.outputs.folded-temp-file }}
+        schema-file: leap-deploy-folded.schema.json

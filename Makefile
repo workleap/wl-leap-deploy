@@ -1,5 +1,6 @@
 SCHEMAS_DIRECTORY := schemas
 SCHEMA_FILE_NAME := leap-deploy.schema.json
+FOLDED_SCHEMA_FILE_NAME := leap-deploy-folded.schema.json
 EXAMPLES_DIRECTORY_NAME := examples
 OUT_DIR := out
 
@@ -8,17 +9,16 @@ FOLD_TEST_ENVIRONMENTS := dev staging prod
 FOLD_TEST_REGIONS := na eu
 FOLD_TEST_OUTPUT := $(OUT_DIR)/folded
 
-AJV_BINARY := ajv
 AJV_VERSION := 5.0.0
+AJV_BINARY := npx ajv-cli@$(AJV_VERSION)
+
+# GitHub repository info (inferred from environment or defaults for local)
+GITHUB_REPOSITORY ?= workleap/wl-leap-deploy
 
 all: validate
 
-.PHONY: install-ajv
-install-ajv:
-	@which $(AJV_BINARY) > /dev/null 2>&1 || (echo "ajv not found, installing..." && npm install -g ajv-cli@$(AJV_VERSION))
-
 .PHONY: test/examples
-test/examples: install-ajv  ## Validate example files against the schemas
+test/examples:
 	@echo "Testing examples against schemas..."
 	@has_errors=0; \
 	for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
@@ -42,7 +42,7 @@ test/examples: install-ajv  ## Validate example files against the schemas
 	fi
 
 .PHONY: test/fold
-test/fold: install-ajv  ## Validate folded configurations against the schemas
+test/fold:
 	@mkdir -p $(FOLD_TEST_OUTPUT)
 	@echo "Testing folding of configurations and results against schemas..."
 	@has_errors=0; \
@@ -52,14 +52,15 @@ test/fold: install-ajv  ## Validate folded configurations against the schemas
 			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
 			examples_dir="$(SCHEMAS_DIRECTORY)/$$version_dir/$(EXAMPLES_DIRECTORY_NAME)"; \
 			schema="$(SCHEMAS_DIRECTORY)/$$version_dir/$(SCHEMA_FILE_NAME)"; \
+			folded_schema="$(SCHEMAS_DIRECTORY)/$$version_dir/$(FOLDED_SCHEMA_FILE_NAME)"; \
 		for env in $(FOLD_TEST_ENVIRONMENTS); do \
 			out_folded="$(FOLD_TEST_OUTPUT)/$$version_number-$$env.json"; \
 			echo "Folding $$example for environment $$env (no region)..."; \
 			if ! $(FOLD_SCRIPT) "$$example" $$env "" false | jq . > "$$out_folded"; then \
 				has_errors=1; \
 			else \
-				echo "Validating folded output against $$schema..."; \
-				if ! $(AJV_BINARY) validate -s $$schema -d "$$out_folded" --all-errors --verbose; then \
+				echo "Validating folded output against $$folded_schema..."; \
+				if ! $(AJV_BINARY) validate -s $$folded_schema -r $$schema -d "$$out_folded" --all-errors --verbose; then \
 					has_errors=1; \
 				fi; \
 			fi; \
@@ -69,8 +70,8 @@ test/fold: install-ajv  ## Validate folded configurations against the schemas
 				if ! $(FOLD_SCRIPT) "$$example" $$env $$region false | jq . > "$$out_folded"; then \
 					has_errors=1; \
 				else \
-					echo "Validating folded output against $$schema..."; \
-					if ! $(AJV_BINARY) validate -s $$schema -d "$$out_folded" --all-errors --verbose; then \
+					echo "Validating folded output against $$folded_schema..."; \
+					if ! $(AJV_BINARY) validate -s $$folded_schema -r $$schema -d "$$out_folded" --all-errors --verbose; then \
 						has_errors=1; \
 					fi; \
 				fi; \
@@ -95,7 +96,7 @@ test/chart: .github/actions/generate-chart/Makefile  ## Generate Helm chart and 
 .PHONY: validate
 validate:  ## Validate schema version patterns
 	@echo "Validating schema version patterns..."
-	@for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
+	@for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME) $(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema" ]; then \
 			version_dir=$$(echo "$$schema" | cut -d'/' -f2); \
 			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
@@ -152,6 +153,25 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 				rm "$$target_name"; \
 			else \
 				echo "    [DRY RUN] cp \"$$schema_version\" \"$$target_name\""; \
+				echo "    [DRY RUN] gh release upload $${LATEST_RELEASE} \"$$target_name\""; \
+				echo "    [DRY RUN] rm \"$$target_name\""; \
+			fi; \
+		fi; \
+	done
+	@for schema_version in $(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
+		if [ -f "$$schema_version" ]; then \
+			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
+			target_name="leap-deploy-folded.$$version.schema.json"; \
+			main_schema_artifact="leap-deploy.$$version.schema.json"; \
+			release_url="https://github.com/$(GITHUB_REPOSITORY)/releases/download/$${LATEST_RELEASE}/$$main_schema_artifact"; \
+			current_ref=$$(jq -r '.properties.workloads."$$ref"' "$$schema_version" | sed 's|#.*||'); \
+			echo "  Uploading $$schema_version as $$target_name (with rewritten \$$ref)"; \
+			if [ "$$CI" = "true" ]; then \
+				sed "s|$$current_ref|$$release_url|" "$$schema_version" > "$$target_name"; \
+				gh release upload $${LATEST_RELEASE} "$$target_name"; \
+				rm "$$target_name"; \
+			else \
+				echo "    [DRY RUN] sed \"s|$$current_ref|$$release_url|\" \"$$schema_version\" > \"$$target_name\""; \
 				echo "    [DRY RUN] gh release upload $${LATEST_RELEASE} \"$$target_name\""; \
 				echo "    [DRY RUN] rm \"$$target_name\""; \
 			fi; \
