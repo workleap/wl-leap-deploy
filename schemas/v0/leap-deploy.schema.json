@@ -36,7 +36,7 @@
     "foldedWorkloadConfigConstraints": {
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/requiredRootWorkloadConfigConstraints" },
+        { "$ref": "#/definitions/requiredRootWorkloadConfigConstraints" }
       ]
     },
     "imageConfig": {
