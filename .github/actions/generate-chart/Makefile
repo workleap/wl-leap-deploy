@@ -26,7 +26,7 @@ HELM_RELEASE_NAME := foobar
 ifndef CI
 GITHUB_SERVER_URL="https://github.com"
 GITHUB_REPOSITORY="workleap/wl-leap-shop"
-GITHUB_WORKFLOW="workleap/wl-leap-deploy/.github/workflows/generate-chart.yml@refs/heads/main"
+GITHUB_WORKFLOW_REF="workleap/wl-leap-deploy/.github/workflows/generate-chart.yml@refs/heads/main"
 GITHUB_RUN_ID="123456789"
 GITHUB_SHA="7f4b7ce6edb5aca1e2291bd34cc8a943991baaef"
 GITHUB_ACTOR="marcellus.wallace@workleap.com"

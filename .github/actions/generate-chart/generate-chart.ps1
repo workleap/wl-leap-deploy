@@ -77,6 +77,7 @@ $ANNOTATION_GITHUB_WORKFLOW_REF = "workleap.github.com/workflow"
 $ANNOTATION_GITHUB_SHA = "workleap.github.com/commit-sha"
 $ANNOTATION_GITHUB_ACTOR = "workleap.github.com/actor"
 $ANNOTATION_WORKLEAP_CHART = "apps.workleap.com/chart"
+$ANNOTATION_WORKLEAP_GENERATED_BY = "apps.workleap.com/generated-by"
 
 # ========================================
 # Module Installation and Import
@@ -154,6 +155,7 @@ function Get-LeapAppAnnotations {
 
     # Chart reference annotation
     $leapAppsAnnotations | Add-Member -NotePropertyName $ANNOTATION_WORKLEAP_CHART -NotePropertyValue "${ChartName}:${ChartVersion}"
+    $leapAppsAnnotations | Add-Member -NotePropertyName $ANNOTATION_WORKLEAP_GENERATED_BY -NotePropertyValue "wl-leap-deploy/${scriptName}@${scriptHash}"
 
     # GitHub annotations using the helper function
     $githubServerUrl = $env:GITHUB_SERVER_URL
@@ -173,7 +175,7 @@ function Get-LeapAppAnnotations {
     }
 
     Add-EnvironmentAnnotation -AnnotationObject $leapAppsAnnotations -AnnotationKey $ANNOTATION_GITHUB_RUN_ID -EnvironmentVariableName 'GITHUB_RUN_ID'
-    Add-EnvironmentAnnotation -AnnotationObject $leapAppsAnnotations -AnnotationKey $ANNOTATION_GITHUB_WORKFLOW_REF -EnvironmentVariableName 'GITHUB_WORKFLOW'
+    Add-EnvironmentAnnotation -AnnotationObject $leapAppsAnnotations -AnnotationKey $ANNOTATION_GITHUB_WORKFLOW_REF -EnvironmentVariableName 'GITHUB_WORKFLOW_REF'
     Add-EnvironmentAnnotation -AnnotationObject $leapAppsAnnotations -AnnotationKey $ANNOTATION_GITHUB_SHA -EnvironmentVariableName 'GITHUB_SHA'
     Add-EnvironmentAnnotation -AnnotationObject $leapAppsAnnotations -AnnotationKey $ANNOTATION_GITHUB_ACTOR -EnvironmentVariableName 'GITHUB_ACTOR'
 
@@ -267,6 +269,11 @@ function New-LeapAppChartValues {
 # ========================================
 # Main Script Execution
 # ========================================
+
+# Get script information for tracking
+$scriptHash = (Get-FileHash -Path $PSCommandPath -Algorithm SHA1).Hash.Substring(0, 7)
+$scriptName = [System.IO.Path]::GetFileName($PSCommandPath)
+Write-Host "Running $scriptName (hash: $scriptHash)"
 
 # Parse and validate JSON inputs
 try {
