@@ -9,7 +9,7 @@
     - A Helm Chart.yaml file with dependencies for each workload
     - A values.yaml file with configuration values for each workload subchart
 
-.PARAMETER ChartRepositoryName
+.PARAMETER ChartRegistry
     The OCI Helm chart repository URL for the leap-app chart.
 
 .PARAMETER ChartName
@@ -180,12 +180,18 @@ function Get-LeapAppAnnotations {
     # GitHub annotations using the helper function
     $githubServerUrl = $env:GITHUB_SERVER_URL
     $githubRepository = $env:GITHUB_REPOSITORY
-    
-    if ($githubServerUrl -and $githubRepository) {
+
+    if (-not $githubServerUrl -or -not $githubRepository) {
+        if (-not $githubServerUrl) {
+            Write-Warning "GITHUB_SERVER_URL environment variable is not set. Repository annotation will be omitted."
+        }
+        
+        if (-not $githubRepository) {
+            Write-Warning "GITHUB_REPOSITORY environment variable is not set. Repository annotation will be omitted."
+        }
+    } else {
         $repoUrl = "$githubServerUrl/$githubRepository"
         $leapAppsAnnotations | Add-Member -NotePropertyName $ANNOTATION_GITHUB_REPO -NotePropertyValue $repoUrl
-    } elseif (-not $githubServerUrl -or -not $githubRepository) {
-        Write-Warning "GITHUB_SERVER_URL or GITHUB_REPOSITORY environment variable is not set. Repository annotation will be omitted."
     }
 
     Add-EnvironmentAnnotation -AnnotationObject $leapAppsAnnotations -AnnotationKey $ANNOTATION_GITHUB_RUN_ID -EnvironmentVariableName 'GITHUB_RUN_ID'
@@ -245,9 +251,6 @@ function New-LeapAppChartValues {
     param(
         [Parameter(Mandatory = $true)]
         [PSCustomObject]$Workload,
-        
-        [Parameter(Mandatory = $true)]
-        [string]$AcrRegistryName,
 
         [Parameter(Mandatory = $true)]
         [PSCustomObject]$Labels,
@@ -262,7 +265,7 @@ function New-LeapAppChartValues {
 
     # Build LeapApp chart's values
     $leapAppChartValues = [PSCustomObject]@{
-        #fullNameOveride = ...
+        # fullnameOverride can be added here if needed
         commonLabels = $Labels
         commonAnnotations = $Annotations
         # Leap-Deploy WorkloadConfig values
@@ -305,15 +308,6 @@ try {
     
     Write-Host "Found $($workloadNames.Count) workload(s): $($workloadNames -join ', ')"
     
-    # Get ACR registry name from the infra config's content
-    $acrRegistryName = $null
-    if ($infraConfig.PSObject.Properties['acr_registry_name']) {
-        $acrRegistryName = $infraConfig.acr_registry_name
-        Write-Host "Found ACR registry name: $acrRegistryName"
-    } else {
-        Write-Warning "acr_registry_name not found in infra config JSON. ACR registry name will be null."
-    }
-    
     Write-Host "Configuration validation completed successfully."
 } catch {
     Write-Error "Configuration validation failed: $_"
@@ -345,6 +339,8 @@ try {
     # Build values.yaml as PSCustomObject
     $valuesObject = [PSCustomObject]@{}
     
+    $annotations = Get-LeapAppAnnotations
+
     # Add each workload's values under its alias
     foreach ($workloadName in $workloadNames) {
         Write-Host "  Processing workload: $workloadName"
@@ -356,13 +352,11 @@ try {
             throw "Workload '$workloadName' not found in folded config"
         }
 
-        $annotations = Get-LeapAppAnnotations
         $labels = Get-LeapAppLabels -Workload $workload
         
         # Generate this sub chart values from the workload config
         $workloadConfig = New-LeapAppChartValues `
             -Workload $workload `
-            -AcrRegistryName $acrRegistryName `
             -Labels $labels `
             -Annotations $annotations
         
