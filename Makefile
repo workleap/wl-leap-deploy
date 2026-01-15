@@ -96,37 +96,7 @@ test/chart: .github/actions/generate-chart/Makefile  ## Generate Helm chart and 
 .PHONY: validate
 validate:  ## Validate schema version patterns
 	@echo "Validating schema version patterns..."
-	@for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
-		if [ -f "$$schema" ]; then \
-			version_dir=$$(echo "$$schema" | cut -d'/' -f2); \
-			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
-			expected_pattern="^$${version_number}(\\.[0-9]+){0,2}\$$"; \
-			actual_pattern=$$(jq -r '.properties.version.pattern' "$$schema"); \
-			echo "Checking $$schema..."; \
-			echo "  Expected pattern: $$expected_pattern"; \
-			echo "  Actual pattern:   $$actual_pattern"; \
-			if [ "$$actual_pattern" != "$$expected_pattern" ]; then \
-				echo "❌ ERROR: Version pattern mismatch in $$schema"; \
-				echo "  Expected: $$expected_pattern"; \
-				echo "  Found:    $$actual_pattern"; \
-				exit 1; \
-			fi; \
-			expected_id_segment="/$$version_dir/"; \
-			actual_id=$$(jq -r '."$$id"' "$$schema"); \
-			echo "  Expected \$$id segment: $$expected_id_segment"; \
-			echo "  Actual \$$id:           $$actual_id"; \
-			if ! echo "$$actual_id" | grep -q "$$expected_id_segment"; then \
-				echo "❌ ERROR: \$$id version segment mismatch in $$schema"; \
-				echo "  Expected segment: $$expected_id_segment"; \
-				echo "  Found \$$id:      $$actual_id"; \
-				exit 1; \
-			fi; \
-			echo "✅ $$schema validation passed"; \
-		fi; \
-	done
-	@echo ""
-	@echo "Validating folded schema version patterns..."
-	@for schema in $(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
+	@for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME) $(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema" ]; then \
 			version_dir=$$(echo "$$schema" | cut -d'/' -f2); \
 			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
