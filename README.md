@@ -128,11 +128,11 @@ workload-name:
   
   autoscaling:                           # Autoscaling configuration
     horizontal:
-      enable: true
+      enabled: true
       minReplicas: 2
       maxReplicas: 10
     vertical:
-      enable: false
+      enabled: false
   
   ingress:                               # Ingress configuration (for APIs)
     pathPrefix: /api
