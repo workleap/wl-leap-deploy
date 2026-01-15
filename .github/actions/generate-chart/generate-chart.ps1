@@ -52,7 +52,7 @@ param(
     [string]$FoldedConfigJson,
 
     [Parameter(Mandatory = $true, Position = 5)]
-    [string]$infraConfigJson,
+    [string]$InfraConfigJson,
 
     [Parameter(Mandatory = $false, Position = 6)]
     [string]$OutputDirectory = ".generated"
@@ -63,6 +63,16 @@ $ErrorActionPreference = "Stop"
 
 # Module version constants
 $POWERSHELL_YAML_VERSION = "0.4.12"
+
+# Label and annotation constants
+$LABEL_WORKLEAP_TYPE = "apps.workleap.com/type"
+$LABEL_WORKLEAP_PRODUCT = "apps.workleap.com/product"
+$ANNOTATION_WORKLEAP_CHART = "apps.workleap.com/chart"
+$ANNOTATION_GITHUB_REPO = "workleap.github.com/repo"
+$ANNOTATION_GITHUB_RUN_ID = "workleap.github.com/run-id"
+$ANNOTATION_GITHUB_WORKFLOW_REF = "workleap.github.com/workflow"
+$ANNOTATION_GITHUB_SHA = "workleap.github.com/commit-sha"
+$ANNOTATION_GITHUB_ACTOR = "workleap.github.com/actor"
 
 # ========================================
 # Module Installation and Import
@@ -85,6 +95,7 @@ try {
 
 # Helper function to get JSON content (from string or file)
 function Get-JsonContent {
+    [OutputType([PSCustomObject])]
     param([string]$JsonInput)
     
     if ([string]::IsNullOrWhiteSpace($JsonInput)) {
@@ -100,8 +111,38 @@ function Get-JsonContent {
     }
 }
 
+# Helper function to add environment variable as annotation if present
+function Add-EnvironmentAnnotation {
+    [OutputType([void])]
+    param(
+        [Parameter(Mandatory = $true)]
+        [PSCustomObject]$AnnotationObject,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$AnnotationKey,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$EnvironmentVariableName,
+        
+        [Parameter(Mandatory = $false)]
+        [string]$WarningMessage
+    )
+    
+    $value = [Environment]::GetEnvironmentVariable($EnvironmentVariableName)
+    if (-not $value) {
+        if ($WarningMessage) {
+            Write-Warning $WarningMessage
+        } else {
+            Write-Warning "$EnvironmentVariableName environment variable is not set. $AnnotationKey annotation will be omitted."
+        }
+    } else {
+        $AnnotationObject | Add-Member -NotePropertyName $AnnotationKey -NotePropertyValue $value
+    }
+}
+
 # Function to build LeapApp labels from workload config and input parameters
 function Get-LeapAppLabels {
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)]
         [PSCustomObject]$Workload
@@ -118,9 +159,6 @@ function Get-LeapAppLabels {
     # Build LeapApps labels. Those will be set on the LeapApp metadata
     $leapAppsLabels = [PSCustomObject]@{}
 
-    $LABEL_WORKLEAP_TYPE = "apps.workleap.com/type"
-    $LABEL_WORKLEAP_PRODUCT = "apps.workleap.com/product"
-
     # Add type and product labels
     $leapAppsLabels | Add-Member -NotePropertyName $LABEL_WORKLEAP_TYPE -NotePropertyValue $workload.type
     $leapAppsLabels | Add-Member -NotePropertyName $LABEL_WORKLEAP_PRODUCT -NotePropertyValue $ProductName
@@ -130,73 +168,37 @@ function Get-LeapAppLabels {
 
 # Function to build LeapApp annotations from environment variables and input parameters
 function Get-LeapAppAnnotations {
+    [OutputType([PSCustomObject])]
+    param()
+    
     # Build LeapApps annotations. Those will be set on the LeapApp metadata
     $leapAppsAnnotations = [PSCustomObject]@{}
-
-    $ANNOTATION_WORKLEAP_CHART = "apps.workleap.com/chart"
-
-    $ANNOTATION_GITHUB_REPO = "workleap.github.com/repo"
-    $ANNOTATION_GITHUB_RUN_ID = "workleap.github.com/run-id"
-    $ANNOTATION_GITHUB_WORKFLOW_REF = "workleap.github.com/workflow"
-    $ANNOTATION_GITHUB_SHA = "workleap.github.com/commit-sha"
-    $ANNOTATION_GITHUB_ACTOR = "workleap.github.com/actor"
 
     # Chart reference annotation
     $leapAppsAnnotations | Add-Member -NotePropertyName $ANNOTATION_WORKLEAP_CHART -NotePropertyValue "${ChartName}:${ChartVersion}"
 
-    # GitHub annotations
+    # GitHub annotations using the helper function
     $githubServerUrl = $env:GITHUB_SERVER_URL
-    if (-not $githubServerUrl) {
-        Write-Warning "GITHUB_SERVER_URL environment variable is not set. Repository annotation will be omitted."
-    }
-    
     $githubRepository = $env:GITHUB_REPOSITORY
-    if (-not $githubRepository) {
-        Write-Warning "GITHUB_REPOSITORY environment variable is not set. Repository annotation will be omitted."
-    }
-        
-    $repoUrl = $null
+    
     if ($githubServerUrl -and $githubRepository) {
         $repoUrl = "$githubServerUrl/$githubRepository"
-    }
-
-    if ($repoUrl) {
         $leapAppsAnnotations | Add-Member -NotePropertyName $ANNOTATION_GITHUB_REPO -NotePropertyValue $repoUrl
+    } elseif (-not $githubServerUrl -or -not $githubRepository) {
+        Write-Warning "GITHUB_SERVER_URL or GITHUB_REPOSITORY environment variable is not set. Repository annotation will be omitted."
     }
 
-    $githubRunId = $env:GITHUB_RUN_ID
-    if (-not $githubRunId) {
-        Write-Warning "GITHUB_RUN_ID environment variable is not set. Run ID annotation will be omitted."
-    } else {
-        $leapAppsAnnotations | Add-Member -NotePropertyName $ANNOTATION_GITHUB_RUN_ID -NotePropertyValue $githubRunId
-    }
-
-    $githubWorkflowRef = $env:GITHUB_WORKFLOW
-    if (-not $githubWorkflowRef) {
-        Write-Warning "GITHUB_WORKFLOW environment variable is not set. Workflow ref annotation will be omitted."
-    } else {
-        $leapAppsAnnotations | Add-Member -NotePropertyName $ANNOTATION_GITHUB_WORKFLOW_REF -NotePropertyValue $githubWorkflowRef
-    }
-
-    $githubCommitSha = $env:GITHUB_SHA
-    if (-not $githubCommitSha) {
-        Write-Warning "GITHUB_SHA environment variable is not set. Commit SHA annotation will be omitted."
-    } else {
-        $leapAppsAnnotations | Add-Member -NotePropertyName $ANNOTATION_GITHUB_SHA -NotePropertyValue $githubCommitSha
-    }
-
-    $githubActor = $env:GITHUB_ACTOR
-    if (-not $githubActor) {
-        Write-Warning "GITHUB_ACTOR environment variable is not set. Actor annotation will be omitted."
-    } else {
-        $leapAppsAnnotations | Add-Member -NotePropertyName $ANNOTATION_GITHUB_ACTOR -NotePropertyValue $githubActor
-    }
+    Add-EnvironmentAnnotation -AnnotationObject $leapAppsAnnotations -AnnotationKey $ANNOTATION_GITHUB_RUN_ID -EnvironmentVariableName 'GITHUB_RUN_ID'
+    Add-EnvironmentAnnotation -AnnotationObject $leapAppsAnnotations -AnnotationKey $ANNOTATION_GITHUB_WORKFLOW_REF -EnvironmentVariableName 'GITHUB_WORKFLOW'
+    Add-EnvironmentAnnotation -AnnotationObject $leapAppsAnnotations -AnnotationKey $ANNOTATION_GITHUB_SHA -EnvironmentVariableName 'GITHUB_SHA'
+    Add-EnvironmentAnnotation -AnnotationObject $leapAppsAnnotations -AnnotationKey $ANNOTATION_GITHUB_ACTOR -EnvironmentVariableName 'GITHUB_ACTOR'
 
     return $leapAppsAnnotations
 }
 
 # Functions which creates an Helm Chart for the leap-deploy folded config - Generates one LeapApp sub-chart dependency per workload
 function New-LeapDeployChart {
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)]
         [string[]]$WorkloadNames,
@@ -238,7 +240,8 @@ function New-LeapDeployChart {
 }
 
 # Function to generate LeapApp chart values from workload config
-function GenerateLeapAppChartValuesFromWorkloadConfig {
+function New-LeapAppChartValues {
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $true)]
         [PSCustomObject]$Workload,
@@ -277,7 +280,7 @@ function GenerateLeapAppChartValuesFromWorkloadConfig {
 try {
     Write-Host "Parsing configuration inputs..."
     $foldedConfig = Get-JsonContent $FoldedConfigJson
-    $infraConfig = Get-JsonContent $infraConfigJson
+    $infraConfig = Get-JsonContent $InfraConfigJson
     Write-Host "Configuration inputs parsed successfully."
 } catch {
     Write-Error "Failed to parse JSON configuration: $_"
@@ -357,7 +360,7 @@ try {
         $labels = Get-LeapAppLabels -Workload $workload
         
         # Generate this sub chart values from the workload config
-        $workloadConfig = GenerateLeapAppChartValuesFromWorkloadConfig `
+        $workloadConfig = New-LeapAppChartValues `
             -Workload $workload `
             -AcrRegistryName $acrRegistryName `
             -Labels $labels `
