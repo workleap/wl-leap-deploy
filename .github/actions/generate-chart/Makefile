@@ -18,7 +18,8 @@ CHART_VERSION ?= 0.1.2
 
 PRODUCT_NAME := foobar
 LEAP_DEPLOY_CONFIG_PATH := ./examples/folded-config.json
-INFRA_CONFIG_PATH := ./examples/infra.json
+ENVIRONMENT := dev
+REGION := eastus
 HELM_RELEASE_NAME := foobar
 
 # Mock GitHub Actions environment variables (for annotations) when not in CI
@@ -45,7 +46,13 @@ $(OUTPUT_DIR)/chart: FORCE
 		exit 1; \
 	fi;
 	@echo "Generating Helm chart from test values..."
-	$(SCRIPT_PATH) $(CHART_REGISTRY) $(CHART_NAME) $(CHART_VERSION) $(PRODUCT_NAME) $(LEAP_DEPLOY_CONFIG_PATH) $(INFRA_CONFIG_PATH) $@
+	$(SCRIPT_PATH) \
+	-ChartRegistry $(CHART_REGISTRY) -ChartName $(CHART_NAME) -ChartVersion $(CHART_VERSION) \
+	-ProductName $(PRODUCT_NAME) \
+	-FoldedConfigJson $(LEAP_DEPLOY_CONFIG_PATH) \
+	-Environment $(ENVIRONMENT) \
+	-Region $(REGION) \
+	-OutputDirectory $@
 
 $(OUTPUT_DIR)/manifests.yaml: $(OUTPUT_DIR)/chart acr/login FORCE
 	@mkdir -p $(OUTPUT_DIR)

@@ -19,9 +19,12 @@ inputs:
   leap-deploy-config:
     description: The folded Leap Deploy configuration for the target environment/region
     required: true
-  infra-config:
-    description: Infra config for the target environment
+  environment:
+    description: The environment name (e.g., dev, staging, prod)
     required: true
+  region:
+    description: The region name (e.g., na, eu, etc.)
+    required: false
 
 outputs:
   chart-directory:
@@ -39,7 +42,8 @@ runs:
         LEAP_APP_CHART_VERSION: ${{ inputs.chart-version }}
         PRODUCT_NAME: ${{ inputs.product-name }}
         LEAP_DEPLOY_CONFIG: ${{ inputs.leap-deploy-config }}
-        INFRA_CONFIG: ${{ inputs.infra-config }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        REGION: ${{ inputs.region }}
         ACTION_PATH: ${{ github.action_path }}
       shell: pwsh
       run: |
@@ -47,12 +51,13 @@ runs:
         New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
         
         & "$env:ACTION_PATH/generate-chart.ps1" `
-          $env:LEAP_APP_CHART_REGISTRY `
-          $env:LEAP_APP_CHART_NAME `
-          $env:LEAP_APP_CHART_VERSION `
-          $env:PRODUCT_NAME `
-          $env:LEAP_DEPLOY_CONFIG `
-          $env:INFRA_CONFIG `
+          -ChartRegistry $env:LEAP_APP_CHART_REGISTRY `
+          -ChartName $env:LEAP_APP_CHART_NAME `
+          -ChartVersion $env:LEAP_APP_CHART_VERSION `
+          -ProductName $env:PRODUCT_NAME `
+          -FoldedConfigJson $env:LEAP_DEPLOY_CONFIG `
+          -Environment $env:ENVIRONMENT `
+          -Region $env:REGION `
           -OutputDirectory $outputDir
         
         echo "chart-directory=$outputDir" >> $env:GITHUB_OUTPUT

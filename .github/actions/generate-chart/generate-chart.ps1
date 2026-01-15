@@ -5,7 +5,7 @@
     Generates Helm Chart.yaml and values.yaml files based on folded leap-deploy configuration.
 
 .DESCRIPTION
-    Takes the folded configuration JSON and repository variables to generate:
+    Takes the folded configuration JSON and other variables to generate:
     - A Helm Chart.yaml file with dependencies for each workload
     - A values.yaml file with configuration values for each workload subchart
 
@@ -24,15 +24,18 @@
 .PARAMETER FoldedConfigJson
     The folded configuration JSON string containing workload definitions.
 
-.PARAMETER InfraConfigJson
-    The infrastructure configuration JSON string.
+.PARAMETER Environment
+    The environment name (e.g., dev, staging, prod).
+
+.PARAMETER Region
+    The Azure region name.
 
 .PARAMETER OutputDirectory
     The directory where the generated files will be written. If the directory does not exist, it will be created.
     Defaults to ".generated" if not specified.
 
 .EXAMPLE
-    ./generate-chart.ps1 'oci://infra0prod0global0registry0acr0ea18c271c312.azurecr.io/helm' 'leap-app' '0.1.2' foobar '{"workloads": {...}}' '{}' ./output
+    ./generate-chart.ps1 -ChartRegistry 'oci://infra0prod0global0registry0acr0ea18c271c312.azurecr.io/helm' -ChartName 'leap-app' -ChartVersion '0.1.2' -ProductName 'foobar' -FoldedConfigJson '{"workloads": {...}}' -Environment 'prod' -Region 'eastus' -OutputDirectory './output'
 #>
 
 param(
@@ -52,9 +55,12 @@ param(
     [string]$FoldedConfigJson,
 
     [Parameter(Mandatory = $true, Position = 5)]
-    [string]$InfraConfigJson,
+    [string]$Environment,
 
     [Parameter(Mandatory = $false, Position = 6)]
+    [string]$Region,
+
+    [Parameter(Mandatory = $false, Position = 7)]
     [string]$OutputDirectory = ".generated"
 )
 
@@ -65,14 +71,12 @@ $ErrorActionPreference = "Stop"
 $POWERSHELL_YAML_VERSION = "0.4.12"
 
 # Label and annotation constants
-$LABEL_WORKLEAP_TYPE = "apps.workleap.com/type"
-$LABEL_WORKLEAP_PRODUCT = "apps.workleap.com/product"
-$ANNOTATION_WORKLEAP_CHART = "apps.workleap.com/chart"
 $ANNOTATION_GITHUB_REPO = "workleap.github.com/repo"
 $ANNOTATION_GITHUB_RUN_ID = "workleap.github.com/run-id"
 $ANNOTATION_GITHUB_WORKFLOW_REF = "workleap.github.com/workflow"
 $ANNOTATION_GITHUB_SHA = "workleap.github.com/commit-sha"
 $ANNOTATION_GITHUB_ACTOR = "workleap.github.com/actor"
+$ANNOTATION_WORKLEAP_CHART = "apps.workleap.com/chart"
 
 # ========================================
 # Module Installation and Import
@@ -138,32 +142,6 @@ function Add-EnvironmentAnnotation {
     } else {
         $AnnotationObject | Add-Member -NotePropertyName $AnnotationKey -NotePropertyValue $value
     }
-}
-
-# Function to build LeapApp labels from workload config and input parameters
-function Get-LeapAppLabels {
-    [OutputType([PSCustomObject])]
-    param(
-        [Parameter(Mandatory = $true)]
-        [PSCustomObject]$Workload
-    )
-    
-    if (-not $Workload) {
-        throw "Workload parameter cannot be null"
-    }
-    
-    if (-not $Workload.PSObject.Properties['type']) {
-        throw "Workload must have a 'type' property"
-    }
-    
-    # Build LeapApps labels. Those will be set on the LeapApp metadata
-    $leapAppsLabels = [PSCustomObject]@{}
-
-    # Add type and product labels
-    $leapAppsLabels | Add-Member -NotePropertyName $LABEL_WORKLEAP_TYPE -NotePropertyValue $workload.type
-    $leapAppsLabels | Add-Member -NotePropertyName $LABEL_WORKLEAP_PRODUCT -NotePropertyValue $ProductName
-
-    return $leapAppsLabels
 }
 
 # Function to build LeapApp annotations from environment variables and input parameters
@@ -253,10 +231,16 @@ function New-LeapAppChartValues {
         [PSCustomObject]$Workload,
 
         [Parameter(Mandatory = $true)]
-        [PSCustomObject]$Labels,
+        [PSCustomObject]$Annotations,
 
         [Parameter(Mandatory = $true)]
-        [PSCustomObject]$Annotations
+        [string]$ProductName,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Environment,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Region
     )
 
     if (-not $Workload) {
@@ -266,10 +250,15 @@ function New-LeapAppChartValues {
     # Build LeapApp chart's values
     $leapAppChartValues = [PSCustomObject]@{
         # fullnameOverride can be added here if needed
-        commonLabels = $Labels
-        commonAnnotations = $Annotations
+        annotations = $Annotations
+        product = $ProductName
+        environment = $Environment
         # Leap-Deploy WorkloadConfig values
         workloadConfig = $Workload
+    }
+
+    if ($Region) {
+        $leapAppChartValues | Add-Member -NotePropertyName "region" -NotePropertyValue $Region
     }
     
     return $leapAppChartValues
@@ -283,7 +272,6 @@ function New-LeapAppChartValues {
 try {
     Write-Host "Parsing configuration inputs..."
     $foldedConfig = Get-JsonContent $FoldedConfigJson
-    $infraConfig = Get-JsonContent $InfraConfigJson
     Write-Host "Configuration inputs parsed successfully."
 } catch {
     Write-Error "Failed to parse JSON configuration: $_"
@@ -351,14 +339,14 @@ try {
         if (-not $workload) {
             throw "Workload '$workloadName' not found in folded config"
         }
-
-        $labels = Get-LeapAppLabels -Workload $workload
         
         # Generate this sub chart values from the workload config
         $workloadConfig = New-LeapAppChartValues `
             -Workload $workload `
-            -Labels $labels `
-            -Annotations $annotations
+            -Annotations $annotations `
+            -ProductName $ProductName `
+            -Region $Region `
+            -Environment $Environment
         
         # Add workload to values object
         $valuesObject | Add-Member -NotePropertyName $workloadName -NotePropertyValue $workloadConfig
