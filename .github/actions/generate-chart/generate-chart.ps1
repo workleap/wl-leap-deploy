@@ -100,6 +100,7 @@ function Get-JsonContent {
     }
 }
 
+# Function to build LeapApp labels from workload config and input parameters
 function Get-LeapAppLabels {
     param(
         [Parameter(Mandatory = $true)]
@@ -126,6 +127,8 @@ function Get-LeapAppLabels {
 
     return $leapAppsLabels
 }
+
+# Function to build LeapApp annotations from environment variables and input parameters
 function Get-LeapAppAnnotations {
     # Build LeapApps annotations. Those will be set on the LeapApp metadata
     $leapAppsAnnotations = [PSCustomObject]@{}
@@ -234,6 +237,7 @@ function New-LeapDeployChart {
     return $chartObject
 }
 
+# Function to generate LeapApp chart values from workload config
 function GenerateLeapAppChartValuesFromWorkloadConfig {
     param(
         [Parameter(Mandatory = $true)]
@@ -338,6 +342,7 @@ try {
     # Build values.yaml as PSCustomObject
     $valuesObject = [PSCustomObject]@{}
     
+    # Add each workload's values under its alias
     foreach ($workloadName in $workloadNames) {
         Write-Host "  Processing workload: $workloadName"
         
