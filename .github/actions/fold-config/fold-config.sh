@@ -12,6 +12,9 @@ JSON_CONFIG=$(yq eval -o=json '.' "$FILE_PATH")
 # Get ID (required field)
 ID=$(echo "$JSON_CONFIG" | jq -r '.id')
 
+# Get version (required field)
+VERSION=$(echo "$JSON_CONFIG" | jq -r '.version')
+
 # Get defaults
 DEFAULTS=$(echo "$JSON_CONFIG" | jq -c '.defaults // {}')
 
@@ -53,6 +56,7 @@ EOF
 
 # Start building output JSON
 echo "{"
+echo "  \"version\": \"$VERSION\","
 echo "  \"id\": \"$ID\","
 echo "  \"workloads\": {"
 FIRST=true

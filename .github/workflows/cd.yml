@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'schemas/**/leap-deploy.schema.json'
+      - 'schemas/**/*.schema.json'
   workflow_dispatch:
 
 jobs:

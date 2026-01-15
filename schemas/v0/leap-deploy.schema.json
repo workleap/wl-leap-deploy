@@ -18,7 +18,10 @@
       "description": "Map of workload names to their configurations",
       "type": "object",
       "additionalProperties": {
-        "$ref": "#/definitions/workloadConfigWithOverrides"
+        "allOf": [
+          { "$ref": "#/definitions/workloadConfigWithOverrides" },
+          { "$ref": "#/definitions/requiredRootWorkloadConfigConstraints" }
+        ]
       },
       "minProperties": 1
     }
@@ -26,6 +29,17 @@
   "required": ["id", "workloads"],
   "additionalProperties": false,
   "definitions": {
+    "requiredRootWorkloadConfigConstraints": {
+      "type": "object",
+      "required": ["type"]
+    },
+    "foldedWorkloadConfigConstraints": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/requiredRootWorkloadConfigConstraints" },
+        { "required": ["type"] }
+      ]
+    },
     "imageConfig": {
       "type": "object",
       "properties": {
@@ -89,6 +103,16 @@
         }
       },
       "additionalProperties": false
+    },
+    "foldedWorkloadConfig": {
+      "description": "Resulting Workload configuration with all overrides applied for the target environment and region - includes required fields",
+      "type": "object",
+      "additionalProperties": {
+        "allOf": [
+          { "$ref": "#/definitions/workloadConfig" },
+          { "$ref": "#/definitions/foldedWorkloadConfigConstraints" }
+        ]
+      }
     },
     "workloadConfig": {
       "type": "object",
@@ -174,7 +198,6 @@
         },
         {
           "type": "object",
-          "required": ["type"],
           "properties": {
             "regions": {
               "type": "object",
