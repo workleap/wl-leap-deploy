@@ -1,9 +1,14 @@
 SCRIPT_PATH := ./generate-chart.ps1
 
+# Load .env file if it exists (for local development)
+-include .env
+export
+
 ifeq ($(CI),true)
   ACR_NAME ?= $(error "ACR_NAME must be set in CI environment")
 else
-  ACR_NAME ?= infra0prod0global0registry0acr0ea18c271c312
+  # Use WORKLEAP_GLOBAL_ACR_NAME defined in .env for local development which is ignored from source control
+  ACR_NAME := $(WORKLEAP_GLOBAL_ACR_NAME)
 endif
 
 CHART_REGISTRY := oci://$(ACR_NAME).azurecr.io/helm
@@ -41,8 +46,6 @@ $(OUTPUT_DIR)/manifests.yaml: $(OUTPUT_DIR)/chart acr/login FORCE
 	@mkdir -p $(OUTPUT_DIR)
 	@helm version
 	@echo "Generating manifests from Helm chart..."
-	@cat $</Chart.yaml
-	@cat $</values.yaml
 	@helm dependency build $<
 	@helm template $(HELM_RELEASE_NAME) $< --values $</values.yaml > $@
 
