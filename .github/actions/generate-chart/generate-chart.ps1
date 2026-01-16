@@ -18,6 +18,9 @@
 .PARAMETER ChartVersion
     The version of the leap-app chart to use.
 
+.PARAMETER ProductName
+    The product name. Used for referencing the workload identity service account.
+
 .PARAMETER FoldedConfigJson
     The folded configuration JSON string containing workload definitions.
 
@@ -35,7 +38,7 @@
     Defaults to ".generated" if not specified.
 
 .EXAMPLE
-    ./generate-chart.ps1 -ChartRegistry 'oci://myacr.azurecr.io/helm' -ChartName 'leap-app' -ChartVersion '0.1.2' -FoldedConfigJson '{"workloads": {...}}' -InfraConfigJson '{}' -Environment 'prod' -Region 'eastus' -OutputDirectory './output'
+    ./generate-chart.ps1 -ChartRegistry 'oci://myacr.azurecr.io/helm' -ChartName 'leap-app' -ChartVersion '0.1.2' -ProductName 'foobar' -FoldedConfigJson '{"workloads": {...}}' -InfraConfigJson '{}' -Environment 'prod' -Region 'eastus' -OutputDirectory './output'
 #>
 
 param(
@@ -49,18 +52,21 @@ param(
     [string]$ChartVersion,
 
     [Parameter(Mandatory = $true, Position = 3)]
-    [string]$FoldedConfigJson,
+    [string]$ProductName,
 
     [Parameter(Mandatory = $true, Position = 4)]
-    [string]$InfraConfigJson,
+    [string]$FoldedConfigJson,
 
     [Parameter(Mandatory = $true, Position = 5)]
+    [string]$InfraConfigJson,
+
+    [Parameter(Mandatory = $true, Position = 6)]
     [string]$Environment,
 
-    [Parameter(Mandatory = $false, Position = 6)]
+    [Parameter(Mandatory = $false, Position = 7)]
     [string]$Region,
 
-    [Parameter(Mandatory = $false, Position = 7)]
+    [Parameter(Mandatory = $false, Position = 8)]
     [string]$OutputDirectory = ".generated"
 )
 
@@ -313,16 +319,6 @@ if ($infraConfig.PSObject.Properties['acr_registry_name']) {
     Write-Host "infraConfig content: $($infraConfig | ConvertTo-Json -Depth 10)"
 }
 
-# Get product name from infra config
-$productName = $null
-if ($infraConfig.PSObject.Properties['product_name']) {
-    $productName = $infraConfig.product_name
-    Write-Host "Found product name: $productName"
-} else {
-    Write-Error "product_name not found in infra config JSON. This field is required."
-    exit 1
-}
-
 # Validate configuration structure
 try {
     Write-Host "Validating configuration structure..."
@@ -389,7 +385,7 @@ try {
         $workloadConfig = New-LeapAppChartValues `
             -Workload $workload `
             -Annotations $annotations `
-            -ProductName $productName `
+            -ProductName $ProductName `
             -Region $Region `
             -Environment $Environment `
             -AcrRegistryName $acrRegistryName
