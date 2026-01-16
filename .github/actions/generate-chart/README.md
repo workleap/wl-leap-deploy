@@ -37,7 +37,7 @@ Generates a Helm chart (Chart.yaml and values.yaml) from a folded leap-deploy co
 ```yaml
 - name: Generate Helm chart
   id: generate-chart
-  uses: workleap/wl-leap-deploy/.github/actions/generate-chart@main
+  uses: workleap/wl-leap-deploy/.github/actions/generate-chart@feature/tgh/feng-1587-4
   with:
     chart-registry: myregistry.azurecr.io
     chart-name: leap-app
@@ -64,7 +64,7 @@ jobs:
 
       - name: Get infrastructure config
         id: infra
-        uses: workleap/wl-leap-deploy/.github/actions/tools-get-infra-config@main
+        uses: workleap/wl-leap-deploy/.github/actions/tools-get-infra-config@feature/tgh/feng-1587-4
         with:
           variables: ${{ toJSON(vars) }}
           environment: dev
@@ -72,7 +72,7 @@ jobs:
 
       - name: Fold leap-deploy configuration
         id: fold
-        uses: workleap/wl-leap-deploy/.github/actions/fold-config@main
+        uses: workleap/wl-leap-deploy/.github/actions/fold-config@feature/tgh/feng-1587-4
         with:
           file-path: devops/leap-deploy.yaml
           environment: dev
@@ -80,7 +80,7 @@ jobs:
 
       - name: Generate Helm chart
         id: generate
-        uses: workleap/wl-leap-deploy/.github/actions/generate-chart@main
+        uses: workleap/wl-leap-deploy/.github/actions/generate-chart@feature/tgh/feng-1587-4
         with:
           chart-registry: ${{ vars.CHART_REGISTRY }}
           chart-name: ${{ vars.CHART_NAME }}
@@ -109,7 +109,7 @@ jobs:
     steps:
       - name: Generate chart
         id: generate
-        uses: workleap/wl-leap-deploy/.github/actions/generate-chart@main
+        uses: workleap/wl-leap-deploy/.github/actions/generate-chart@feature/tgh/feng-1587-4
         with:
           chart-registry: ${{ vars.CHART_REGISTRY }}
           chart-name: ${{ vars.CHART_NAME }}

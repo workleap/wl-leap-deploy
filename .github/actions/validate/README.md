@@ -23,7 +23,7 @@ Validates `leap-deploy.yaml` configuration files against the leap-deploy JSON sc
 
 ```yaml
 - name: Validate deployment configuration
-  uses: workleap/wl-leap-deploy/.github/actions/validate@main
+  uses: workleap/wl-leap-deploy/.github/actions/validate@feature/tgh/feng-1587-4
   with:
     file-path: ./devops/leap-deploy.yaml
 ```
@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Validate leap-deploy.yaml
-        uses: workleap/wl-leap-deploy/.github/actions/validate@main
+        uses: workleap/wl-leap-deploy/.github/actions/validate@feature/tgh/feng-1587-4
         with:
           file-path: devops/leap-deploy.yaml
 ```
