@@ -24,6 +24,9 @@
 .PARAMETER FoldedConfigJson
     The folded configuration JSON string containing workload definitions.
 
+.PARAMETER InfraConfigJson
+    The infrastructure configuration JSON string.
+
 .PARAMETER Environment
     The environment name (e.g., dev, staging, prod).
 
@@ -35,7 +38,7 @@
     Defaults to ".generated" if not specified.
 
 .EXAMPLE
-    ./generate-chart.ps1 -ChartRegistry 'oci://infra0prod0global0registry0acr0ea18c271c312.azurecr.io/helm' -ChartName 'leap-app' -ChartVersion '0.1.2' -ProductName 'foobar' -FoldedConfigJson '{"workloads": {...}}' -Environment 'prod' -Region 'eastus' -OutputDirectory './output'
+    ./generate-chart.ps1 -ChartRegistry 'oci://myacr.azurecr.io/helm' -ChartName 'leap-app' -ChartVersion '0.1.2' -ProductName 'foobar' -FoldedConfigJson '{"workloads": {...}}' -InfraConfigJson '{}' -Environment 'prod' -Region 'eastus' -OutputDirectory './output'
 #>
 
 param(
@@ -55,12 +58,15 @@ param(
     [string]$FoldedConfigJson,
 
     [Parameter(Mandatory = $true, Position = 5)]
+    [string]$InfraConfigJson,
+
+    [Parameter(Mandatory = $true, Position = 6)]
     [string]$Environment,
 
-    [Parameter(Mandatory = $false, Position = 6)]
+    [Parameter(Mandatory = $false, Position = 7)]
     [string]$Region,
 
-    [Parameter(Mandatory = $false, Position = 7)]
+    [Parameter(Mandatory = $false, Position = 8)]
     [string]$OutputDirectory = ".generated"
 )
 
@@ -242,11 +248,28 @@ function New-LeapAppChartValues {
         [string]$Environment,
 
         [Parameter(Mandatory = $false)]
-        [string]$Region
+        [string]$Region,
+
+        [Parameter(Mandatory = $false)]
+        [string]$AcrRegistryName
     )
 
     if (-not $Workload) {
         throw "Workload parameter cannot be null"
+    }
+
+    # If ACR registry name is provided, ensure the workload config includes it
+    $workloadConfigToUse = $Workload
+    if ($AcrRegistryName -and $Workload.PSObject.Properties['image']) {
+        # Clone the workload config to avoid modifying the original
+        $workloadConfigToUse = $Workload | ConvertTo-Json -Depth 100 | ConvertFrom-Json
+        
+        # Add registry field to image if not already present
+        if (-not $workloadConfigToUse.image.PSObject.Properties['registry']) {
+            $imageRegistry = "$AcrRegistryName.azurecr.io"
+            $workloadConfigToUse.image | Add-Member -NotePropertyName 'registry' -NotePropertyValue $imageRegistry -Force
+            Write-Host "    Added registry '$imageRegistry' to image configuration"
+        }
     }
 
     # Build LeapApp chart's values
@@ -256,7 +279,7 @@ function New-LeapAppChartValues {
         product = $ProductName
         environment = $Environment
         # Leap-Deploy WorkloadConfig values
-        workloadConfig = $Workload
+        workloadConfig = $workloadConfigToUse
     }
 
     if ($Region) {
@@ -279,10 +302,21 @@ Write-Host "Running $scriptName (hash: $scriptHash)"
 try {
     Write-Host "Parsing configuration inputs..."
     $foldedConfig = Get-JsonContent $FoldedConfigJson
+    $infraConfig = Get-JsonContent $InfraConfigJson
     Write-Host "Configuration inputs parsed successfully."
 } catch {
     Write-Error "Failed to parse JSON configuration: $_"
     exit 1
+}
+
+# Get ACR registry name from infra config
+$acrRegistryName = $null
+if ($infraConfig.PSObject.Properties['acr_registry_name']) {
+    $acrRegistryName = $infraConfig.acr_registry_name
+    Write-Host "Found ACR registry name: $acrRegistryName"
+} else {
+    Write-Warning "acr_registry_name not found in infra config JSON"
+    Write-Host "infraConfig content: $($infraConfig | ConvertTo-Json -Depth 10)"
 }
 
 # Validate configuration structure
@@ -353,7 +387,8 @@ try {
             -Annotations $annotations `
             -ProductName $ProductName `
             -Region $Region `
-            -Environment $Environment
+            -Environment $Environment `
+            -AcrRegistryName $acrRegistryName
         
         # Add workload to values object
         $valuesObject | Add-Member -NotePropertyName $workloadName -NotePropertyValue $workloadConfig

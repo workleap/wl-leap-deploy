@@ -18,6 +18,7 @@ CHART_VERSION ?= 0.1.2
 
 PRODUCT_NAME := foobar
 LEAP_DEPLOY_CONFIG_PATH := ./examples/folded-config.json
+INFRA_CONFIG_PATH := ./examples/infra-config.json
 ENVIRONMENT := dev
 REGION := eastus
 HELM_RELEASE_NAME := foobar
@@ -50,6 +51,7 @@ $(OUTPUT_DIR)/chart: FORCE
 	-ChartRegistry $(CHART_REGISTRY) -ChartName $(CHART_NAME) -ChartVersion $(CHART_VERSION) \
 	-ProductName $(PRODUCT_NAME) \
 	-FoldedConfigJson $(LEAP_DEPLOY_CONFIG_PATH) \
+	-InfraConfigJson $(INFRA_CONFIG_PATH) \
 	-Environment $(ENVIRONMENT) \
 	-Region $(REGION) \
 	-OutputDirectory $@
