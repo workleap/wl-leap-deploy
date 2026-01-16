@@ -13,18 +13,21 @@ inputs:
   chart-version:
     description: The version of the chart to use for workloads.
     required: true
-  product-name:
-    description: The product name.
-    required: true
-  environment:
-    description: The environment name (e.g., dev, staging, prod)
-    required: true
   leap-deploy-config:
     description: The folded Leap Deploy configuration for the target environment/region
     required: true
   infra-config:
     description: Infra config for the target environment
     required: true
+  product-name:
+    description: The product name.
+    required: true
+  environment:
+    description: The environment name (e.g., dev, staging, prod)
+    required: true
+  region:
+    description: The region name (e.g., na, eu, etc.)
+    required: false
 
 outputs:
   chart-directory:
