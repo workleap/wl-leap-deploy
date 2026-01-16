@@ -22,7 +22,8 @@ Generates a Helm chart (Chart.yaml and values.yaml) from a folded leap-deploy co
 | `chart-version`      | Yes      | -       | The version of the chart to use for workloads                                  |
 | `product-name`       | Yes      | -       | The product name                                                               |
 | `leap-deploy-config` | Yes      | -       | The folded Leap Deploy configuration for the target environment/region         |
-| `infra-config`       | Yes      | -       | Infra config for the target environment                                        |
+| `environment`        | Yes      | -       | The environment name (e.g., dev, staging, prod)                                |
+| `region`             | No       | -       | The region name (e.g., na, eu, etc.)                                           |
 
 ## Outputs
 
@@ -44,7 +45,8 @@ Generates a Helm chart (Chart.yaml and values.yaml) from a folded leap-deploy co
     chart-version: 0.1.2
     product-name: my-product
     leap-deploy-config: ${{ steps.fold.outputs.folded-config }}
-    infra-config: ${{ steps.infra.outputs.environment-config }}
+    environment: dev
+    region: na
 
 - name: View generated chart
   run: |
@@ -61,14 +63,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Get infrastructure config
-        id: infra
-        uses: workleap/wl-leap-deploy/.github/actions/tools-get-infra-config@main
-        with:
-          variables: ${{ toJSON(vars) }}
-          environment: dev
-          region: na
 
       - name: Fold leap-deploy configuration
         id: fold
@@ -87,7 +81,8 @@ jobs:
           chart-version: 0.1.2
           product-name: ${{ vars.PRODUCT_NAME }}
           leap-deploy-config: ${{ steps.fold.outputs.folded-config }}
-          infra-config: ${{ steps.infra.outputs.environment-config }}
+          environment: dev
+          region: na
 
       - name: Deploy with Helm
         run: |
@@ -116,7 +111,8 @@ jobs:
           chart-version: 0.1.2
           product-name: my-product
           leap-deploy-config: ${{ steps.fold.outputs.folded-config }}
-          infra-config: ${{ steps.infra.outputs.environment-config }}
+          environment: prod
+          region: na
 
       - name: Upload chart artifact
         uses: actions/upload-artifact@v4
@@ -217,29 +213,7 @@ Must be a folded configuration JSON (output from fold-config):
 }
 ```
 
-### infra-config Format
-
-Must contain infrastructure details (output from tools-get-infra-config):
-
-```json
-{
-  "acr_registry_name": "myregistry",
-  "aks": {
-    "default": {
-      "cluster_name": "my-aks-cluster",
-      "resource_group_name": "my-rg"
-    }
-  }
-}
-```
-
 ## Troubleshooting
-
-**Missing ACR registry name:**
-
-- Ensure `infra-config` contains `acr_registry_name` property
-- Verify the infrastructure configuration was generated correctly
-- Check that the tools-get-infra-config action ran successfully
 
 **PowerShell module errors:**
 
@@ -249,8 +223,7 @@ Must contain infrastructure details (output from tools-get-infra-config):
 **Invalid JSON inputs:**
 
 - Verify that `leap-deploy-config` is valid JSON (use `jq` to validate)
-- Ensure `infra-config` is properly formatted JSON
-- Check that both inputs contain all required fields
+- Check that the input contains all required fields
 
 **Chart directory not found:**
 
