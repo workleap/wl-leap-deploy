@@ -13,13 +13,29 @@ FOLD_TEST_ENVIRONMENTS := dev staging prod
 FOLD_TEST_REGIONS := na eu
 FOLD_TEST_OUTPUT := $(OUT_DIR)/folded
 
-AJV_VERSION := 5.0.0
-AJV_BINARY := npx ajv-cli@$(AJV_VERSION)
+JSONSCHEMA_VERSION := 14.0.4
+JSONSCHEMA_BINARY := jsonschema
 
 # GitHub repository info (inferred from environment or defaults for local)
 GITHUB_REPOSITORY ?= workleap/wl-leap-deploy
 
 all: validate
+
+.PHONY: install-jsonschema
+install-jsonschema:  ## Install the jsonschema CLI if not present
+	@if ! command -v $(JSONSCHEMA_BINARY) &> /dev/null; then \
+		echo "Installing jsonschema CLI v$(JSONSCHEMA_VERSION)..."; \
+		curl --retry 5 --location --fail-early --silent --show-error \
+			--output /tmp/jsonschema-install.sh \
+			"https://raw.githubusercontent.com/sourcemeta/jsonschema/main/install"; \
+		chmod +x /tmp/jsonschema-install.sh; \
+		/tmp/jsonschema-install.sh $(JSONSCHEMA_VERSION) $$HOME/.local; \
+		rm /tmp/jsonschema-install.sh; \
+		echo "Installed jsonschema CLI to $$HOME/.local/bin"; \
+		echo "Make sure $$HOME/.local/bin is in your PATH"; \
+	else \
+		echo "jsonschema CLI already installed: $$($(JSONSCHEMA_BINARY) --version)"; \
+	fi
 
 .PHONY: test/examples
 test/examples:
@@ -28,10 +44,13 @@ test/examples:
 	for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema" ]; then \
 			version_dir=$$(echo "$$schema" | cut -d'/' -f2); \
-			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
-			examples_dir="$(SCHEMAS_DIRECTORY)/$$version_dir/$(EXAMPLES_DIRECTORY_NAME)"; \
+			schema_dir="$(SCHEMAS_DIRECTORY)/$$version_dir"; \
+			examples_dir="$$schema_dir/$(EXAMPLES_DIRECTORY_NAME)"; \
 			echo "Validating examples in $$examples_dir against $$schema..."; \
-			if ! $(AJV_BINARY) validate -s $$schema -d "$$examples_dir/*" --all-errors --verbose; then \
+			if ! $(JSONSCHEMA_BINARY) validate "$$schema" "$$examples_dir" \
+				--resolve "$$schema_dir" \
+				--extension .schema.json \
+				--verbose; then \
 				has_errors=1; \
 			fi; \
 		fi; \
@@ -54,9 +73,8 @@ test/fold:
 		if [ -f "$$example" ]; then \
 			version_dir=$$(echo "$$example" | cut -d'/' -f2); \
 			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
-			examples_dir="$(SCHEMAS_DIRECTORY)/$$version_dir/$(EXAMPLES_DIRECTORY_NAME)"; \
-			schema="$(SCHEMAS_DIRECTORY)/$$version_dir/$(SCHEMA_FILE_NAME)"; \
-			folded_schema="$(SCHEMAS_DIRECTORY)/$$version_dir/$(FOLDED_SCHEMA_FILE_NAME)"; \
+			schema_dir="$(SCHEMAS_DIRECTORY)/$$version_dir"; \
+			folded_schema="$$schema_dir/$(FOLDED_SCHEMA_FILE_NAME)"; \
 		for env in $(FOLD_TEST_ENVIRONMENTS); do \
 			out_folded="$(FOLD_TEST_OUTPUT)/$$version_number-$$env.json"; \
 			echo "Folding $$example for environment $$env (no region)..."; \
@@ -64,7 +82,10 @@ test/fold:
 				has_errors=1; \
 			else \
 				echo "Validating folded output against $$folded_schema..."; \
-				if ! $(AJV_BINARY) validate -s $$folded_schema -r $$schema -d "$$out_folded" --all-errors --verbose; then \
+				if ! $(JSONSCHEMA_BINARY) validate "$$folded_schema" "$$out_folded" \
+					--resolve "$$schema_dir" \
+					--extension .schema.json \
+					--verbose; then \
 					has_errors=1; \
 				fi; \
 			fi; \
@@ -75,7 +96,10 @@ test/fold:
 					has_errors=1; \
 				else \
 					echo "Validating folded output against $$folded_schema..."; \
-					if ! $(AJV_BINARY) validate -s $$folded_schema -r $$schema -d "$$out_folded" --all-errors --verbose; then \
+					if ! $(JSONSCHEMA_BINARY) validate "$$folded_schema" "$$out_folded" \
+						--resolve "$$schema_dir" \
+						--extension .schema.json \
+						--verbose; then \
 						has_errors=1; \
 					fi; \
 				fi; \
@@ -90,6 +114,27 @@ test/fold:
 	else \
 		echo ""; \
 		echo "✅ All validations passed successfully!"; \
+	fi
+
+.PHONY: test/metaschema
+test/metaschema:  ## Validate that schema files are valid JSON Schema
+	@echo "Validating schema files against their metaschemas..."
+	@has_errors=0; \
+	for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
+		if [ -d "$$schema_dir" ]; then \
+			echo "Validating schemas in $$schema_dir..."; \
+			if ! $(JSONSCHEMA_BINARY) metaschema "$$schema_dir"*.schema.json --verbose; then \
+				has_errors=1; \
+			fi; \
+		fi; \
+	done; \
+	if [ $$has_errors -eq 1 ]; then \
+		echo ""; \
+		echo "❌ Metaschema validation failed"; \
+		exit 1; \
+	else \
+		echo ""; \
+		echo "✅ All schemas are valid!"; \
 	fi
 
 .PHONY: test/chart
@@ -184,7 +229,7 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 	@echo "✅ All artifacts uploaded successfully!"
 
 .PHONY: test
-test: test/examples test/fold ## Run all tests
+test: test/metaschema test/examples test/fold ## Run all tests
 
 .PHONY: clean
 clean:

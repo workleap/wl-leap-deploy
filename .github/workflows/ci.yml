@@ -16,9 +16,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Install JSON Schema CLI
+        uses: sourcemeta/jsonschema@v14.0.4
       
       - name: Validate schema version patterns
         run: make validate
+
+      - name: Validate schemas against metaschemas
+        run: make test/metaschema
 
       - name: Validate examples against schemas
         run: make test/examples
@@ -28,6 +34,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Install JSON Schema CLI
+        uses: sourcemeta/jsonschema@v14.0.4
 
       - name: Fold configurations and validate results against schemas
         run: make test/fold
