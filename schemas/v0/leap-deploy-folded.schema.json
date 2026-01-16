@@ -4,6 +4,25 @@
   "title": "Folded Workload Configuration",
   "description": "Schema for validating folded/resolved workload configurations with all overrides applied",
   "type": "object",
+  "examples": [
+    {
+      "id": "my-application",
+      "workloads": {
+        "api": {
+          "type": "api",
+          "replicas": 5,
+          "image": {
+            "repository": "my-app",
+            "tag": "1.0.0"
+          },
+          "ingress": {
+            "pathPrefix": "/api",
+            "fqdn": "api.example.com"
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "version": {
       "type": "string",
@@ -15,13 +34,13 @@
       "description": "Unique identifier for this deployment configuration"
     },
     "workloads": {
+      "type": "object",
+      "description": "Map of workload names to their folded configurations",
       "additionalProperties": {
-        "allOf": [
-          { "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/definitions/foldedWorkloadConfig" }
-        ]
+        "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/definitions/foldedWorkloadConfig"
       }
     }
   },
-  "required": ["version", "id", "workloads"],
+  "required": ["id", "workloads"],
   "additionalProperties": false
 }

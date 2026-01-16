@@ -4,6 +4,30 @@
   "title": "Leap Deploy Configuration",
   "description": "Schema for leap-deploy.yaml configuration file",
   "type": "object",
+  "examples": [
+    {
+      "id": "my-application",
+      "workloads": {
+        "api": {
+          "type": "api",
+          "replicas": 3,
+          "image": {
+            "repository": "my-app",
+            "tag": "1.0.0"
+          },
+          "ingress": {
+            "pathPrefix": "/api",
+            "fqdn": "api.example.com"
+          },
+          "environments": {
+            "prod": {
+              "replicas": 5
+            }
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "version": {
       "type": "string",
@@ -115,7 +139,6 @@
       "type": "object",
       "properties": {
         "type": {
-          "type": "string",
           "enum": ["api", "worker"],
           "description": "Workload type - either 'api' for API services or 'worker' for background workers"
         },
@@ -170,42 +193,34 @@
       }
     },
     "workloadConfigWithEnvironmentOverrides": {
+      "type": "object",
       "allOf": [
-        {
-          "$ref": "#/definitions/workloadConfig"
-        },
-        {
+        { "$ref": "#/definitions/workloadConfig" }
+      ],
+      "properties": {
+        "environments": {
           "type": "object",
-          "properties": {
-            "environments": {
-              "type": "object",
-              "description": "Environment-specific overrides within a region",
-              "additionalProperties": {
-                "$ref": "#/definitions/workloadConfig"
-              }
-            }
+          "description": "Environment-specific overrides within a region",
+          "additionalProperties": {
+            "$ref": "#/definitions/workloadConfig"
           }
         }
-      ]
+      }
     },
     "workloadConfigWithOverrides": {
+      "type": "object",
       "allOf": [
-        {
-          "$ref": "#/definitions/workloadConfigWithEnvironmentOverrides"
-        },
-        {
+        { "$ref": "#/definitions/workloadConfigWithEnvironmentOverrides" }
+      ],
+      "properties": {
+        "regions": {
           "type": "object",
-          "properties": {
-            "regions": {
-              "type": "object",
-              "description": "Region-specific overrides (na, eu, etc.)",
-              "additionalProperties": {
-                "$ref": "#/definitions/workloadConfigWithEnvironmentOverrides"
-              }
-            }
+          "description": "Region-specific overrides (na, eu, etc.)",
+          "additionalProperties": {
+            "$ref": "#/definitions/workloadConfigWithEnvironmentOverrides"
           }
         }
-      ]
+      }
     }
   }
 }
