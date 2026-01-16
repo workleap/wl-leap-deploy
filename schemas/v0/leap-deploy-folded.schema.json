@@ -15,6 +15,8 @@
       "description": "Unique identifier for this deployment configuration"
     },
     "workloads": {
+      "description": "Map of workload names to their configurations",
+      "type": "object",
       "additionalProperties": {
         "allOf": [
           { "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/definitions/foldedWorkloadConfig" }
