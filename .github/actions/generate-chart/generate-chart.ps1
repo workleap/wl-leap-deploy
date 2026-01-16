@@ -241,7 +241,7 @@ function New-LeapAppChartValues {
         [Parameter(Mandatory = $true)]
         [string]$Environment,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [string]$Region
     )
 
