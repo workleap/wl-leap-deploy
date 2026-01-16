@@ -29,6 +29,18 @@ jobs:
       - name: Validate examples against schemas
         run: make test/examples
 
+  lint-schemas:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install JSON Schema CLI
+        uses: sourcemeta/jsonschema@v14.0.4
+
+      - name: Lint schemas
+        run: make lint
+
   validate-config-folding:
     runs-on: ubuntu-latest
     steps:

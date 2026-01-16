@@ -142,6 +142,27 @@ test/chart: .github/actions/generate-chart/Makefile  ## Generate Helm chart and 
 	@echo "Generating Helm chart and validating manifests..."
 	@make -C .github/actions/generate-chart all
 
+.PHONY: lint
+lint:  ## Lint schema files
+	@echo "Linting schema files..."
+	@has_errors=0; \
+	for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
+		if [ -d "$$schema_dir" ]; then \
+			echo "Linting schemas in $$schema_dir..."; \
+			if ! $(JSONSCHEMA_BINARY) lint "$$schema_dir"*.schema.json --resolve "$$schema_dir"/$(SCHEMA_FILE_NAME) --verbose --exclude orphan_definitions; then \
+				has_errors=1; \
+			fi; \
+		fi; \
+	done; \
+	if [ $$has_errors -eq 1 ]; then \
+		echo ""; \
+		echo "❌ Linting failed for one or more schemas"; \
+		exit 1; \
+	else \
+		echo ""; \
+		echo "✅ All schemas linted successfully!"; \
+	fi
+
 .PHONY: validate
 validate:  ## Validate schema version patterns
 	@echo "Validating schema version patterns..."

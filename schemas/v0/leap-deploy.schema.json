@@ -55,6 +55,9 @@
   "definitions": {
     "requiredRootWorkloadConfigConstraints": {
       "type": "object",
+      "properties": {
+        "type": {}
+      },
       "required": ["type"]
     },
     "foldedWorkloadConfigConstraints": {
