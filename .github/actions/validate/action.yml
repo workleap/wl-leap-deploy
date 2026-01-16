@@ -18,9 +18,19 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install JSON Schema CLI
+      uses: sourcemeta/jsonschema@v14.0.4
+
     - name: Validate configuration
-      uses: dsanders11/json-schema-validate-action@v1.4.0
-      with:
-        schema: ${{ github.action_path }}/schemas/${{ inputs.version }}/${{ inputs.schema-file }}
-        files: ${{ inputs.file-path }}
-        all-errors: true
+      shell: bash
+      env:
+        SCHEMA_DIR: ${{ github.action_path }}/schemas/${{ inputs.version }}
+        SCHEMA_FILE: ${{ inputs.schema-file }}
+        DATA_FILE: ${{ inputs.file-path }}
+      run: |
+        jsonschema validate \
+          "${SCHEMA_DIR}/${SCHEMA_FILE}" \
+          "${DATA_FILE}" \
+          --resolve "${SCHEMA_DIR}" \
+          --extension .schema.json \
+          --verbose
