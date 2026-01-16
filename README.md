@@ -105,7 +105,7 @@ You can also configure schema mappings in your workspace settings (VS Code `.vsc
 
 Every configuration file must include:
 
-- `version`: Schema version (e.g., `"1.0.0"`, `"1.0"`, or `"1"`)
+- `version`: Schema version (optional, e.g., `"0"`, `"0.1"`, `"0.1.0"`)
 - `id`: Unique identifier for the deployment configuration
 - `workloads`: Map of workload names to their configurations
 

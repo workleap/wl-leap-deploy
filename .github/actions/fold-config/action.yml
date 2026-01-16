@@ -26,7 +26,7 @@ runs:
   using: composite
   steps:
     - name: Validate input configuration
-      uses: workleap/wl-leap-deploy/.github/actions/validate@feature/tgh/feng-1587-4
+      uses: workleap/wl-leap-deploy/.github/actions/validate@main
       with:
         file-path: ${{ inputs.file-path }}
     
@@ -66,7 +66,7 @@ runs:
         echo "EOF" >> $GITHUB_OUTPUT
 
     - name: Validate folded configuration
-      uses: workleap/wl-leap-deploy/.github/actions/validate@feature/tgh/feng-1587-4
+      uses: workleap/wl-leap-deploy/.github/actions/validate@main
       with:
         file-path: ${{ steps.fold.outputs.folded-temp-file }}
         schema-file: leap-deploy-folded.schema.json

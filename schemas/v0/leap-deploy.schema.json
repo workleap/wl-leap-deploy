@@ -4,6 +4,30 @@
   "title": "Leap Deploy Configuration",
   "description": "Schema for leap-deploy.yaml configuration file",
   "type": "object",
+  "examples": [
+    {
+      "id": "my-application",
+      "workloads": {
+        "api": {
+          "type": "api",
+          "replicas": 3,
+          "image": {
+            "repository": "my-app",
+            "tag": "1.0.0"
+          },
+          "ingress": {
+            "pathPrefix": "/api",
+            "fqdn": "api.example.com"
+          },
+          "environments": {
+            "prod": {
+              "replicas": 5
+            }
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "version": {
       "type": "string",

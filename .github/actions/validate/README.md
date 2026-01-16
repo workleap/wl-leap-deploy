@@ -12,10 +12,11 @@ Validates `leap-deploy.yaml` configuration files against the leap-deploy JSON sc
 
 ## Inputs
 
-| Input       | Required | Default | Description                                       |
-| ----------- | -------- | ------- | ------------------------------------------------- |
-| `file-path` | Yes      | -       | Path to the `leap-deploy.yaml` configuration file |
-| `version`   | No       | `v0`    | Schema version to validate against                |
+| Input         | Required | Default                   | Description                                                                                               |
+| ------------- | -------- | ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `file-path`   | Yes      | -                         | Path to the configuration file                                                                            |
+| `version`     | No       | `v0`                      | Schema version to validate against                                                                        |
+| `schema-file` | No       | `leap-deploy.schema.json` | Schema filename to validate against (e.g., `leap-deploy.schema.json` or `leap-deploy-folded.schema.json`) |
 
 ## Usage
 
@@ -23,7 +24,7 @@ Validates `leap-deploy.yaml` configuration files against the leap-deploy JSON sc
 
 ```yaml
 - name: Validate deployment configuration
-  uses: workleap/wl-leap-deploy/.github/actions/validate@feature/tgh/feng-1587-4
+  uses: workleap/wl-leap-deploy/.github/actions/validate@main
   with:
     file-path: ./devops/leap-deploy.yaml
 ```
@@ -38,9 +39,19 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Validate leap-deploy.yaml
-        uses: workleap/wl-leap-deploy/.github/actions/validate@feature/tgh/feng-1587-4
+        uses: workleap/wl-leap-deploy/.github/actions/validate@main
         with:
           file-path: devops/leap-deploy.yaml
+```
+
+### Validating Folded Configuration
+
+```yaml
+- name: Validate folded configuration
+  uses: workleap/wl-leap-deploy/.github/actions/validate@main
+  with:
+    file-path: /tmp/folded-config.json
+    schema-file: leap-deploy-folded.schema.json
 ```
 
 ## What Gets Validated

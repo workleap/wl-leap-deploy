@@ -33,7 +33,7 @@ Processes `leap-deploy.yaml` configuration files by merging defaults, workload s
 ```yaml
 - name: Fold deployment configuration
   id: fold
-  uses: workleap/wl-leap-deploy/.github/actions/fold-config@feature/tgh/feng-1587-4
+  uses: workleap/wl-leap-deploy/.github/actions/fold-config@main
   with:
     file-path: ./devops/leap-deploy.yaml
     environment: dev
@@ -57,7 +57,7 @@ jobs:
 
       - name: Fold configuration for production
         id: fold
-        uses: workleap/wl-leap-deploy/.github/actions/fold-config@feature/tgh/feng-1587-4
+        uses: workleap/wl-leap-deploy/.github/actions/fold-config@main
         with:
           file-path: devops/leap-deploy.yaml
           environment: prod
