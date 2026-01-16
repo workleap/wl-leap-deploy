@@ -10,7 +10,7 @@ Generates a Helm chart (Chart.yaml and values.yaml) from a folded leap-deploy co
 - **LeapApp Integration**: Generated values.yaml conforms to the [LeapApp Helm Chart schema](https://github.com/workleap/wl-leap-controller/tree/main/charts/leap-app)
 - **Values Transformation**: Converts folded configuration into Helm-compatible values.yaml
 - **Multi-Workload Support**: Generates subcharts for each workload (APIs, workers) defined in the configuration
-- **Infrastructure Integration**: Incorporates infrastructure details (ACR registry, AKS cluster info) into chart values
+- **Infrastructure Integration**: Incorporates infrastructure details (ACR registry name from infra-config) into chart values
 - **Atomic Deployment**: Enables deploying all workloads together as a single Helm release
 
 ## Inputs
@@ -20,8 +20,8 @@ Generates a Helm chart (Chart.yaml and values.yaml) from a folded leap-deploy co
 | `chart-registry`     | Yes      | -       | The Azure Container Registry address containing the chart to use for workloads |
 | `chart-name`         | Yes      | -       | The name of the chart to use for workloads                                     |
 | `chart-version`      | Yes      | -       | The version of the chart to use for workloads                                  |
-| `product-name`       | Yes      | -       | The product name                                                               |
 | `leap-deploy-config` | Yes      | -       | The folded Leap Deploy configuration for the target environment/region         |
+| `infra-config`       | Yes      | -       | The infrastructure configuration JSON string                                   |
 | `environment`        | Yes      | -       | The environment name (e.g., dev, staging, prod)                                |
 | `region`             | No       | -       | The region name (e.g., na, eu, etc.)                                           |
 
@@ -43,8 +43,8 @@ Generates a Helm chart (Chart.yaml and values.yaml) from a folded leap-deploy co
     chart-registry: myregistry.azurecr.io
     chart-name: leap-app
     chart-version: 0.1.2
-    product-name: my-product
     leap-deploy-config: ${{ steps.fold.outputs.folded-config }}
+    infra-config: ${{ steps.get-infra.outputs.infra-config }}
     environment: dev
     region: na
 
@@ -79,8 +79,8 @@ jobs:
           chart-registry: ${{ vars.CHART_REGISTRY }}
           chart-name: ${{ vars.CHART_NAME }}
           chart-version: 0.1.2
-          product-name: ${{ vars.PRODUCT_NAME }}
           leap-deploy-config: ${{ steps.fold.outputs.folded-config }}
+          infra-config: ${{ vars.INFRA_CONFIG }}
           environment: dev
           region: na
 
@@ -109,8 +109,8 @@ jobs:
           chart-registry: ${{ vars.CHART_REGISTRY }}
           chart-name: ${{ vars.CHART_NAME }}
           chart-version: 0.1.2
-          product-name: my-product
           leap-deploy-config: ${{ steps.fold.outputs.folded-config }}
+          infra-config: ${{ vars.INFRA_CONFIG }}
           environment: prod
           region: na
 
@@ -212,6 +212,23 @@ Must be a folded configuration JSON (output from fold-config):
   }
 }
 ```
+
+### infra-config Format
+
+Infrastructure configuration JSON containing Azure resource details:
+
+```json
+{
+  "product_name": "my-product",
+  "acr_registry_name": "myregistry"
+}
+```
+
+Required fields:
+- `product_name`: The product name, used for referencing the workload identity service account
+
+Optional fields:
+- `acr_registry_name`: Used to automatically populate the image registry in the generated chart values. If provided, the script will add the registry field (e.g., `myregistry.azurecr.io`) to workload image configurations that don't already have it.
 
 ## Troubleshooting
 

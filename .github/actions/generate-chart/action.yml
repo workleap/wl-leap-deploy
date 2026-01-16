@@ -13,18 +13,15 @@ inputs:
   chart-version:
     description: The version of the chart to use for workloads.
     required: true
-  product-name:
-    description: The product name.
+  environment:
+    description: The environment name (e.g., dev, staging, prod)
     required: true
   leap-deploy-config:
     description: The folded Leap Deploy configuration for the target environment/region
     required: true
-  environment:
-    description: The environment name (e.g., dev, staging, prod)
+  infra-config:
+    description: Infra config for the target environment
     required: true
-  region:
-    description: The region name (e.g., na, eu, etc.)
-    required: false
 
 outputs:
   chart-directory:
@@ -40,8 +37,8 @@ runs:
         LEAP_APP_CHART_REGISTRY: ${{ inputs.chart-registry }}
         LEAP_APP_CHART_NAME: ${{ inputs.chart-name }}
         LEAP_APP_CHART_VERSION: ${{ inputs.chart-version }}
-        PRODUCT_NAME: ${{ inputs.product-name }}
         LEAP_DEPLOY_CONFIG: ${{ inputs.leap-deploy-config }}
+        INFRA_CONFIG: ${{ inputs.infra-config }}
         ENVIRONMENT: ${{ inputs.environment }}
         REGION: ${{ inputs.region }}
         ACTION_PATH: ${{ github.action_path }}
@@ -54,8 +51,8 @@ runs:
           -ChartRegistry $env:LEAP_APP_CHART_REGISTRY `
           -ChartName $env:LEAP_APP_CHART_NAME `
           -ChartVersion $env:LEAP_APP_CHART_VERSION `
-          -ProductName $env:PRODUCT_NAME `
           -FoldedConfigJson $env:LEAP_DEPLOY_CONFIG `
+          -InfraConfigJson $env:INFRA_CONFIG `
           -Environment $env:ENVIRONMENT `
           -Region $env:REGION `
           -OutputDirectory $outputDir
