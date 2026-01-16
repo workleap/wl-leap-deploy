@@ -56,7 +56,9 @@ EOF
 
 # Start building output JSON
 echo "{"
-echo "  \"version\": \"$VERSION\","
+if [[ "$VERSION" != "null" && -n "$VERSION" ]]; then
+  echo "  \"version\": \"$VERSION\","
+fi
 echo "  \"id\": \"$ID\","
 echo "  \"workloads\": {"
 FIRST=true
