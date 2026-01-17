@@ -23,12 +23,6 @@ jobs:
       - name: Validate schema version patterns
         run: make validate
 
-      - name: Validate schemas against metaschemas
-        run: make test/metaschema
-
-      - name: Validate examples against schemas
-        run: make test/examples
-
   lint-schemas:
     runs-on: ubuntu-latest
     steps:

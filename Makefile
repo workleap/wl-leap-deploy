@@ -2,11 +2,15 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -euo pipefail -c
 	
+OUT_DIR := out
+
 SCHEMAS_DIRECTORY := schemas
 SCHEMA_FILE_NAME := leap-deploy.schema.json
 FOLDED_SCHEMA_FILE_NAME := leap-deploy-folded.schema.json
 EXAMPLES_DIRECTORY_NAME := examples
-OUT_DIR := out
+
+SCHEMA_FILES := $(shell find $(SCHEMAS_DIRECTORY) -name '*.schema.json' -type f)
+OUT_SCHEMA_FILES := $(addprefix $(OUT_DIR)/,$(SCHEMA_FILES))
 
 FOLD_SCRIPT := .github/actions/fold-config/fold-config.sh
 FOLD_TEST_ENVIRONMENTS := dev staging prod
@@ -19,7 +23,13 @@ JSONSCHEMA_BINARY := jsonschema
 # GitHub repository info (inferred from environment or defaults for local)
 GITHUB_REPOSITORY ?= workleap/wl-leap-deploy
 
-all: validate
+.DEFAULT_GOAL := all
+
+all: validate lint test
+
+$(OUT_DIR)/%.schema.json: %.schema.json
+	@mkdir -p $(dir $@)
+	cp $< $@
 
 .PHONY: install-jsonschema
 install-jsonschema:  ## Install the jsonschema CLI if not present
@@ -35,33 +45,6 @@ install-jsonschema:  ## Install the jsonschema CLI if not present
 		echo "Make sure $$HOME/.local/bin is in your PATH"; \
 	else \
 		echo "jsonschema CLI already installed: $$($(JSONSCHEMA_BINARY) --version)"; \
-	fi
-
-.PHONY: test/examples
-test/examples:
-	@echo "Testing examples against schemas..."
-	@has_errors=0; \
-	for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
-		if [ -f "$$schema" ]; then \
-			version_dir=$$(echo "$$schema" | cut -d'/' -f2); \
-			schema_dir="$(SCHEMAS_DIRECTORY)/$$version_dir"; \
-			examples_dir="$$schema_dir/$(EXAMPLES_DIRECTORY_NAME)"; \
-			echo "Validating examples in $$examples_dir against $$schema..."; \
-			if ! $(JSONSCHEMA_BINARY) validate "$$schema" "$$examples_dir" \
-				--resolve "$$schema_dir" \
-				--extension .schema.json \
-				--verbose; then \
-				has_errors=1; \
-			fi; \
-		fi; \
-	done; \
-	if [ $$has_errors -eq 1 ]; then \
-		echo ""; \
-		echo "❌ Validation failed for one or more schemas"; \
-		exit 1; \
-	else \
-		echo ""; \
-		echo "✅ All validations passed successfully!"; \
 	fi
 
 .PHONY: test/fold
@@ -116,11 +99,11 @@ test/fold:
 		echo "✅ All validations passed successfully!"; \
 	fi
 
-.PHONY: test/metaschema
-test/metaschema:  ## Validate that schema files are valid JSON Schema
+.PHONY: validate/metaschema
+validate/metaschema: package  ## Validate that schema files are valid JSON Schema
 	@echo "Validating schema files against their metaschemas..."
 	@has_errors=0; \
-	for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
+	for schema_dir in $(OUT_DIR)/$(SCHEMAS_DIRECTORY)/v*/; do \
 		if [ -d "$$schema_dir" ]; then \
 			echo "Validating schemas in $$schema_dir..."; \
 			if ! $(JSONSCHEMA_BINARY) metaschema "$$schema_dir"*.schema.json --verbose; then \
@@ -137,16 +120,11 @@ test/metaschema:  ## Validate that schema files are valid JSON Schema
 		echo "✅ All schemas are valid!"; \
 	fi
 
-.PHONY: test/chart
-test/chart: .github/actions/generate-chart/Makefile  ## Generate Helm chart and template manifests
-	@echo "Generating Helm chart and validating manifests..."
-	@make -C .github/actions/generate-chart all
-
 .PHONY: lint
-lint:  ## Lint schema files
+lint: package  ## Lint schema files
 	@echo "Linting schema files..."
 	@has_errors=0; \
-	for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
+	for schema_dir in $(OUT_DIR)/$(SCHEMAS_DIRECTORY)/v*/; do \
 		if [ -d "$$schema_dir" ]; then \
 			echo "Linting schemas in $$schema_dir..."; \
 			if ! $(JSONSCHEMA_BINARY) lint "$$schema_dir"*.schema.json --resolve "$$schema_dir"/$(SCHEMA_FILE_NAME) --verbose --exclude orphan_definitions; then \
@@ -163,12 +141,12 @@ lint:  ## Lint schema files
 		echo "✅ All schemas linted successfully!"; \
 	fi
 
-.PHONY: validate
-validate:  ## Validate schema version patterns
-	@echo "Validating schema version patterns..."
-	@for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME) $(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
+.PHONY: validate/versions
+validate/versions: package  ## Test that schema version patterns and $id are correct
+	@echo "Testing schema version patterns and '$$id' fields..."
+	@for schema in $(OUT_DIR)/$(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME) $(OUT_DIR)/$(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema" ]; then \
-			version_dir=$$(echo "$$schema" | cut -d'/' -f2); \
+			version_dir=$$(echo "$$schema" | cut -d'/' -f3); \
 			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
 			expected_pattern="^$${version_number}(\\.[0-9]+){0,2}\$$"; \
 			actual_pattern=$$(jq -r '.properties.version.pattern' "$$schema"); \
@@ -197,8 +175,11 @@ validate:  ## Validate schema version patterns
 	@echo ""
 	@echo "All schema validations passed!"
 
+.PHONY: validate
+validate: validate/metaschema validate/versions ## Validate schemas
+
 .PHONY: upload-artifacts
-upload-artifacts:  ## Upload schema artifacts to GitHub release
+upload-artifacts: package  ## Upload schema artifacts to GitHub release
 	@if [ "$$CI" = "true" ]; then \
 		if [ -z "$$LATEST_RELEASE" ]; then \
 			echo "❌ ERROR: LATEST_RELEASE environment variable is not set"; \
@@ -212,37 +193,39 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 		echo "🏠 Running locally - commands will be echoed but not executed"; \
 	fi
 	@echo "Uploading artifacts to release $${LATEST_RELEASE}..."
-	@for schema_version in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
+	@for schema_version in $(OUT_DIR)/$(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
+		latest_release=$${LATEST_RELEASE:-unset}; \
 		if [ -f "$$schema_version" ]; then \
-			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
+			version=$$(echo "$$schema_version" | cut -d'/' -f3); \
 			target_name="leap-deploy.$$version.schema.json"; \
 			echo "  Uploading $$schema_version as $$target_name"; \
 			if [ "$$CI" = "true" ]; then \
 				cp "$$schema_version" "$$target_name"; \
-				gh release upload $${LATEST_RELEASE} "$$target_name"; \
+				gh release upload $${latest_release} "$$target_name"; \
 				rm "$$target_name"; \
 			else \
 				echo "    [DRY RUN] cp \"$$schema_version\" \"$$target_name\""; \
-				echo "    [DRY RUN] gh release upload $${LATEST_RELEASE} \"$$target_name\""; \
+				echo "    [DRY RUN] gh release upload $${latest_release} \"$$target_name\""; \
 				echo "    [DRY RUN] rm \"$$target_name\""; \
 			fi; \
 		fi; \
 	done
-	@for schema_version in $(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
+	@for schema_version in $(OUT_DIR)/$(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
+		latest_release=$${LATEST_RELEASE:-unset}; \
 		if [ -f "$$schema_version" ]; then \
-			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
+			version=$$(echo "$$schema_version" | cut -d'/' -f3); \
 			target_name="leap-deploy-folded.$$version.schema.json"; \
 			main_schema_artifact="leap-deploy.$$version.schema.json"; \
-			release_url="https://github.com/$(GITHUB_REPOSITORY)/releases/download/$${LATEST_RELEASE}/$$main_schema_artifact"; \
-			current_ref=$$(jq -r '.properties.workloads."$$ref"' "$$schema_version" | sed 's|#.*||'); \
+			release_url="https://github.com/$(GITHUB_REPOSITORY)/releases/download/$${latest_release}/$$main_schema_artifact"; \
+			current_ref=$$(jq -r '.properties.workloads.additionalProperties."$$ref"' "$$schema_version" | sed 's|#.*||'); \
 			echo "  Uploading $$schema_version as $$target_name (with rewritten \$$ref)"; \
 			if [ "$$CI" = "true" ]; then \
 				sed "s|$$current_ref|$$release_url|" "$$schema_version" > "$$target_name"; \
-				gh release upload $${LATEST_RELEASE} "$$target_name"; \
+				gh release upload $${latest_release} "$$target_name"; \
 				rm "$$target_name"; \
 			else \
 				echo "    [DRY RUN] sed \"s|$$current_ref|$$release_url|\" \"$$schema_version\" > \"$$target_name\""; \
-				echo "    [DRY RUN] gh release upload $${LATEST_RELEASE} \"$$target_name\""; \
+				echo "    [DRY RUN] gh release upload $${latest_release} \"$$target_name\""; \
 				echo "    [DRY RUN] rm \"$$target_name\""; \
 			fi; \
 		fi; \
@@ -250,7 +233,29 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 	@echo "✅ All artifacts uploaded successfully!"
 
 .PHONY: test
-test: test/metaschema test/examples test/fold ## Run all tests
+test: test/fold  test/chart ## Run all tests
+
+.PHONY: build
+build: $(OUT_SCHEMA_FILES)  ## Build all schema files to out directory
+
+.PHONY: package
+package: build  ## Package schemas with embedded examples
+	@echo "Embedding examples into schemas..."
+	@for schema in $(OUT_SCHEMA_FILES); do \
+		schema_dir=$$(dirname "$$schema" | sed 's|^$(OUT_DIR)/||'); \
+		examples_dir="$$schema_dir/$(EXAMPLES_DIRECTORY_NAME)"; \
+		if [ -d "$$examples_dir" ]; then \
+			echo "  Embedding examples from $$examples_dir into $$schema"; \
+			examples_json=$$(for ex in "$$examples_dir"/*.yaml; do yq -o=json "$$ex"; done | jq -s '.'); \
+			jq --argjson examples "$$examples_json" '.examples = $$examples' "$$schema" > "$$schema.tmp" && mv "$$schema.tmp" "$$schema"; \
+		fi; \
+	done
+	@echo "✅ All examples embedded!"
+
+.PHONY: test/chart
+test/chart: .github/actions/generate-chart/Makefile  ## Generate Helm chart and template manifests
+	@echo "Generating Helm chart and validating manifests..."
+	@make -C .github/actions/generate-chart all
 
 .PHONY: clean
 clean:
