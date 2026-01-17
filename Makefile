@@ -3,6 +3,7 @@ SHELL := /bin/bash
 .SHELLFLAGS := -euo pipefail -c
 	
 OUT_DIR := out
+BANNER := .workleap
 
 SCHEMAS_DIRECTORY := schemas
 SCHEMA_FILE_NAME := leap-deploy.schema.json
@@ -31,8 +32,12 @@ $(OUT_DIR)/%.schema.json: %.schema.json
 	@mkdir -p $(dir $@)
 	cp $< $@
 
-.PHONY: install-jsonschema
-install-jsonschema:  ## Install the jsonschema CLI if not present
+.PHONY: banner
+banner: $(BANNER)
+	@cat $(BANNER)
+
+.PHONY: install-cli
+install-cli:  ## Install the jsonschema CLI if not present
 	@if ! command -v $(JSONSCHEMA_BINARY) &> /dev/null; then \
 		echo "Installing jsonschema CLI v$(JSONSCHEMA_VERSION)..."; \
 		curl --retry 5 --location --fail-early --silent --show-error \
@@ -48,7 +53,7 @@ install-jsonschema:  ## Install the jsonschema CLI if not present
 	fi
 
 .PHONY: test/fold
-test/fold:
+test/fold:  # Test folding configurations and validating against folded schemas
 	@mkdir -p $(FOLD_TEST_OUTPUT)
 	@echo "Testing folding of configurations and results against schemas..."
 	@has_errors=0; \
@@ -100,7 +105,7 @@ test/fold:
 	fi
 
 .PHONY: validate/metaschema
-validate/metaschema: package  ## Validate that schema files are valid JSON Schema
+validate/metaschema: package  # Validate that schema files are valid JSON Schema
 	@echo "Validating schema files against their metaschemas..."
 	@has_errors=0; \
 	for schema_dir in $(OUT_DIR)/$(SCHEMAS_DIRECTORY)/v*/; do \
@@ -142,7 +147,7 @@ lint: package  ## Lint schema files
 	fi
 
 .PHONY: validate/versions
-validate/versions: package  ## Test that schema version patterns and $id are correct
+validate/versions: package  # Test that schema version patterns and $id are correct
 	@echo "Testing schema version patterns and '$$id' fields..."
 	@for schema in $(OUT_DIR)/$(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME) $(OUT_DIR)/$(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema" ]; then \
@@ -252,16 +257,11 @@ package: build  ## Package schemas with embedded examples
 	done
 	@echo "✅ All examples embedded!"
 
-.PHONY: test/chart
-test/chart: .github/actions/generate-chart/Makefile  ## Generate Helm chart and template manifests
-	@echo "Generating Helm chart and validating manifests..."
-	@make -C .github/actions/generate-chart all
-
 .PHONY: clean
 clean:
 	@rm -rf $(OUT_DIR)
 
 .PHONY: help
-help:  ## Display this help message
+help: banner  ## Display this help message
 	@echo "Available targets:"
 	@grep -E '^[a-zA-Z_/-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
