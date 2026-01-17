@@ -229,7 +229,8 @@
           "type": "object",
           "properties": {
             "enabled": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           },
           "additionalProperties": false
@@ -238,15 +239,18 @@
           "type": "object",
           "properties": {
             "enabled": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": true
             },
             "minReplicas": {
               "type": "integer",
-              "minimum": 1
+              "minimum": 1,
+              "default": 2
             },
             "maxReplicas": {
               "type": "integer",
-              "minimum": 1
+              "minimum": 1,
+              "default": 3
             }
           },
           "additionalProperties": false
@@ -286,13 +290,15 @@
         "replicas": {
           "type": "integer",
           "minimum": 1,
-          "description": "Number of replicas"
+          "description": "Number of replicas",
+          "default": 2
         },
         "autoscaling": {
           "$ref": "#/definitions/autoscalingConfig"
         },
         "resources": {
           "type": "object",
+          "description": "Resource requests for the workload. Defaults are determined by the tooling based on workload type.",
           "properties": {
             "requests": {
               "type": "object",
@@ -315,7 +321,8 @@
           "$ref": "#/definitions/imageConfig"
         },
         "ingress": {
-          "$ref": "#/definitions/ingressConfig"
+          "$ref": "#/definitions/ingressConfig",
+          "default": null
         }
       }
     },
