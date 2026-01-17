@@ -26,130 +26,6 @@
           }
         }
       }
-    },
-    {
-      "version": "0",
-      "id": "foobar",
-      "workloads": {
-        "workleap-sample-api": {
-          "type": "api",
-          "image": {
-            "repository": "wl-mono-repo"
-          },
-          "ingress": {
-            "pathPrefix": "/api"
-          },
-          "environments": {
-            "dev": {
-              "replicas": 1,
-              "resources": {
-                "requests": {
-                  "cpu": "50m",
-                  "memory": "64Mi"
-                }
-              },
-              "autoscaling": {
-                "horizontal": {
-                  "minReplicas": 1,
-                  "maxReplicas": 2
-                }
-              }
-            },
-            "staging": {
-              "replicas": 2,
-              "resources": {
-                "requests": {
-                  "cpu": "100m",
-                  "memory": "128Mi"
-                }
-              }
-            },
-            "prod": {
-              "replicas": 3,
-              "autoscaling": {
-                "horizontal": {
-                  "minReplicas": 3,
-                  "maxReplicas": 10
-                }
-              },
-              "resources": {
-                "requests": {
-                  "cpu": "200m",
-                  "memory": "256Mi"
-                }
-              }
-            }
-          },
-          "regions": {
-            "na": {
-              "environments": {
-                "prod": {
-                  "replicas": 5,
-                  "autoscaling": {
-                    "horizontal": {
-                      "minReplicas": 5,
-                      "maxReplicas": 20
-                    }
-                  }
-                }
-              }
-            },
-            "eu": {
-              "environments": {
-                "prod": {
-                  "namespace": "eu-prod",
-                  "labels": {
-                    "data-residency": "eu"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "workleap-sample-worker": {
-          "type": "worker",
-          "annotations": {
-            "apps.workleap.com/flavor": "worker"
-          },
-          "ingress": null,
-          "image": {
-            "repository": "wl-mono-repo"
-          },
-          "environments": {
-            "dev": {
-              "replicas": 1,
-              "autoscaling": {
-                "horizontal": {
-                  "enabled": false
-                }
-              }
-            },
-            "prod": {
-              "replicas": 3,
-              "resources": {
-                "requests": {
-                  "cpu": "500m",
-                  "memory": "512Mi"
-                }
-              }
-            }
-          }
-        },
-        "workleap-minimal-service": {
-          "type": "api",
-          "annotations": {
-            "apps.workleap.com/flavor": "service"
-          },
-          "image": {
-            "repository": "minimal-service"
-          },
-          "environments": {
-            "prod": {
-              "replicas": 4
-            }
-          }
-        }
-      }
     }
   ],
   "properties": {
@@ -298,7 +174,7 @@
         },
         "resources": {
           "type": "object",
-          "description": "Resource requests for the workload. Defaults are determined by the tooling based on workload type.",
+          "description": "Resource requests for the workload",
           "properties": {
             "requests": {
               "type": "object",
