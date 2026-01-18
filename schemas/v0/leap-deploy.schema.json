@@ -26,6 +26,44 @@
           }
         }
       }
+    },
+    {
+      "id": "multi-region-overrides-example",
+      "workloads": {
+        "api": {
+          "type": "api",
+          "replicas": 2,
+          "image": { "repository": "my-api" },
+          "ingress": { "pathPrefix": "/api" },
+          "environments": {
+            "prod": { "replicas": 3 }
+          },
+          "regions": {
+            "eu": {
+              "replicas": 1,
+              "environments": {
+                "prod": { "replicas": 2 }
+              }
+            }
+          }
+        },
+        "worker": {
+          "type": "worker",
+          "replicas": 1,
+          "image": { "repository": "my-worker" },
+          "environments": {
+            "staging": { "replicas": 2 },
+            "prod": { "replicas": 3 }
+          },
+          "regions": {
+            "na": {
+              "environments": {
+                "prod": { "replicas": 5 }
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "properties": {
