@@ -14,7 +14,7 @@ ASSERTIONS_DIRECTORY_NAME := assertions
 SCHEMA_FILES := $(shell find $(SCHEMAS_DIRECTORY) -name '*.schema.json' -type f)
 OUT_SCHEMA_FILES := $(addprefix $(OUT_DIR)/,$(SCHEMA_FILES))
 
-FOLD_SCRIPT := .github/actions/fold-config/fold-config.sh
+FOLD_SCRIPT := scripts/fold-config.sh
 FOLD_TEST_ENVIRONMENTS := dev staging prod
 FOLD_TEST_REGIONS := na eu
 FOLD_TEST_OUTPUT := $(OUT_DIR)/folded
