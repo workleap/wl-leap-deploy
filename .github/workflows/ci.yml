@@ -35,7 +35,7 @@ jobs:
       - name: Lint schemas
         run: make lint
 
-  validate-config-folding:
+  test-config-folding:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
