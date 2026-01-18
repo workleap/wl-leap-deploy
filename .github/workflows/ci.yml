@@ -20,7 +20,7 @@ jobs:
       - name: Install JSON Schema CLI
         uses: sourcemeta/jsonschema@v14.0.4
       
-      - name: Validate schema version patterns
+      - name: Validate schemas
         run: make validate
 
   lint-schemas:
@@ -35,7 +35,7 @@ jobs:
       - name: Lint schemas
         run: make lint
 
-  test-config-folding:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
