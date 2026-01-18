@@ -234,8 +234,42 @@ validate/tests:  # Validate that test input files are valid against the schema
 		echo "✅ All test inputs are valid!"; \
 	fi
 
+.PHONY: validate/tests/assertions
+validate/tests/assertions:  # Validate that test assertion files are valid against the folded schema
+	@echo "Validating test assertion files against folded schema..."
+	@has_errors=0; \
+	for test_dir in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*/; do \
+		if [ -d "$$test_dir" ]; then \
+			version_dir=$$(echo "$$test_dir" | cut -d'/' -f2); \
+			schema_dir="$(SCHEMAS_DIRECTORY)/$$version_dir"; \
+			schema_file="$$schema_dir/$(FOLDED_SCHEMA_FILE_NAME)"; \
+			for assertion_file in "$$test_dir"*.yaml; do \
+				if [ -f "$$assertion_file" ] && [ "$$(basename "$$assertion_file")" != "input.yaml" ]; then \
+					echo "Validating $$assertion_file against $$schema_file..."; \
+					temp_file="$$(mktemp)"; \
+					yq -o=json "$$assertion_file" > "$$temp_file"; \
+					if ! $(JSONSCHEMA_BINARY) validate "$$schema_file" "$$temp_file" \
+						--resolve "$$schema_dir" \
+						--extension .schema.json; then \
+						echo "❌ VALIDATION FAILED: $$assertion_file"; \
+						has_errors=1; \
+					fi; \
+					rm -f "$$temp_file"; \
+				fi; \
+			done; \
+		fi; \
+	done; \
+	if [ $$has_errors -eq 1 ]; then \
+		echo ""; \
+		echo "❌ Assertion validation failed"; \
+		exit 1; \
+	else \
+		echo ""; \
+		echo "✅ All test assertions are valid!"; \
+	fi
+
 .PHONY: validate
-validate: validate/metaschema validate/versions validate/tests ## Validate schemas
+validate: validate/metaschema validate/versions validate/tests validate/tests/assertions ## Validate schemas against metaschema and conventions as well as test inputs and assertions
 
 .PHONY: upload-artifacts
 upload-artifacts:  ## Upload schema artifacts to GitHub release

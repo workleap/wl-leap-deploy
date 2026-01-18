@@ -11,19 +11,7 @@ permissions:
   id-token: write
 
 jobs:
-  validate-schemas:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Install JSON Schema CLI
-        uses: sourcemeta/jsonschema@v14.0.4
-      
-      - name: Validate schemas
-        run: make validate
-
-  lint-schemas:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,6 +23,18 @@ jobs:
       - name: Lint schemas
         run: make lint
 
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install JSON Schema CLI
+        uses: sourcemeta/jsonschema@v14.0.4
+      
+      - name: Validate schemas
+        run: make validate
+
   tests:
     runs-on: ubuntu-latest
     steps:
@@ -44,6 +44,5 @@ jobs:
       - name: Install JSON Schema CLI
         uses: sourcemeta/jsonschema@v14.0.4
 
-      - name: Fold configurations and validate results against schemas
-        run: make test/folding
-
+      - name: Test folding of configurations
+        run: make test
