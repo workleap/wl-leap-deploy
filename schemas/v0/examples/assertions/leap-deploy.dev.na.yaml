@@ -1,0 +1,34 @@
+version: "0"
+id: foobar
+workloads:
+  workleap-minimal-service:
+    type: api
+    annotations:
+      apps.workleap.com/flavor: service
+    image:
+      repository: minimal-service
+  workleap-sample-api:
+    type: api
+    image:
+      repository: wl-mono-repo
+    ingress:
+      pathPrefix: /api
+    replicas: 1
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+    autoscaling:
+      horizontal:
+        minReplicas: 1
+        maxReplicas: 2
+  workleap-sample-worker:
+    type: worker
+    annotations:
+      apps.workleap.com/flavor: worker
+    image:
+      repository: wl-mono-repo
+    replicas: 1
+    autoscaling:
+      horizontal:
+        enabled: false

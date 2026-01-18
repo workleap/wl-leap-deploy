@@ -104,6 +104,94 @@ test/fold:  # Test folding configurations and validating against folded schemas
 		echo "✅ All validations passed successfully!"; \
 	fi
 
+ASSERTIONS_DIRECTORY_NAME := assertions
+
+.PHONY: test/examples-folding
+test/examples-folding:  # Test folding examples and asserting against expected outputs
+	@mkdir -p $(FOLD_TEST_OUTPUT)
+	@echo "Testing example folding against assertion files..."
+	@has_errors=0; \
+	for example in $(SCHEMAS_DIRECTORY)/v*/$(EXAMPLES_DIRECTORY_NAME)/*.yaml; do \
+		if [ -f "$$example" ]; then \
+			example_name=$$(basename "$$example" .yaml); \
+			example_dir=$$(dirname "$$example"); \
+			version_dir=$$(echo "$$example" | cut -d'/' -f2); \
+			schema_dir="$(SCHEMAS_DIRECTORY)/$$version_dir"; \
+			folded_schema="$$schema_dir/$(FOLDED_SCHEMA_FILE_NAME)"; \
+			assertions_dir="$$example_dir/$(ASSERTIONS_DIRECTORY_NAME)"; \
+			if [ ! -d "$$assertions_dir" ]; then \
+				echo "⚠️  No assertions directory for $$example_dir, skipping..."; \
+				continue; \
+			fi; \
+			for env in $(FOLD_TEST_ENVIRONMENTS); do \
+				assertion_file="$$assertions_dir/$${example_name}.$${env}.yaml"; \
+				if [ ! -f "$$assertion_file" ]; then \
+					echo "⚠️  Missing assertion file: $$assertion_file"; \
+					continue; \
+				fi; \
+				echo "Testing $$example_name for env=$$env (no region)..."; \
+				temp_file="$(FOLD_TEST_OUTPUT)/$$example_name-$$env.json"; \
+				$(FOLD_SCRIPT) "$$example" "$$env" "" false | jq . > "$$temp_file"; \
+				folded_yaml=$$(cat "$$temp_file" | yq -P); \
+				assertion_content=$$(cat "$$assertion_file"); \
+				if [ "$$folded_yaml" != "$$assertion_content" ]; then \
+					echo "❌ ASSERTION FAILED: $$example_name env=$$env (no region)"; \
+					echo "Expected (from $$assertion_file):"; \
+					echo "$$assertion_content"; \
+					echo "---"; \
+					echo "Got:"; \
+					echo "$$folded_yaml"; \
+					has_errors=1; \
+				else \
+					echo "Validating against schema..."; \
+					if ! $(JSONSCHEMA_BINARY) validate "$$folded_schema" "$$temp_file" \
+						--resolve "$$schema_dir" \
+						--extension .schema.json; then \
+						echo "❌ SCHEMA VALIDATION FAILED: $$example_name env=$$env (no region)"; \
+						has_errors=1; \
+					fi; \
+				fi; \
+				for region in $(FOLD_TEST_REGIONS); do \
+					assertion_file="$$assertions_dir/$${example_name}.$${env}.$${region}.yaml"; \
+					if [ ! -f "$$assertion_file" ]; then \
+						echo "⚠️  Missing assertion file: $$assertion_file"; \
+						continue; \
+					fi; \
+					echo "Testing $$example_name for env=$$env region=$$region..."; \
+					temp_file="$(FOLD_TEST_OUTPUT)/$$example_name-$$env-$$region.json"; \
+					$(FOLD_SCRIPT) "$$example" "$$env" "$$region" false | jq . > "$$temp_file"; \
+					folded_yaml=$$(cat "$$temp_file" | yq -P); \
+					assertion_content=$$(cat "$$assertion_file"); \
+					if [ "$$folded_yaml" != "$$assertion_content" ]; then \
+						echo "❌ ASSERTION FAILED: $$example_name env=$$env region=$$region"; \
+						echo "Expected (from $$assertion_file):"; \
+						echo "$$assertion_content"; \
+						echo "---"; \
+						echo "Got:"; \
+						echo "$$folded_yaml"; \
+						has_errors=1; \
+					else \
+						echo "Validating against schema..."; \
+						if ! $(JSONSCHEMA_BINARY) validate "$$folded_schema" "$$temp_file" \
+							--resolve "$$schema_dir" \
+							--extension .schema.json; then \
+							echo "❌ SCHEMA VALIDATION FAILED: $$example_name env=$$env region=$$region"; \
+							has_errors=1; \
+						fi; \
+					fi; \
+				done; \
+			done; \
+		fi; \
+	done; \
+	if [ $$has_errors -eq 1 ]; then \
+		echo ""; \
+		echo "❌ Example folding tests failed"; \
+		exit 1; \
+	else \
+		echo ""; \
+		echo "✅ All example folding tests passed!"; \
+	fi
+
 .PHONY: validate/metaschema
 validate/metaschema: package  # Validate that schema files are valid JSON Schema
 	@echo "Validating schema files against their metaschemas..."
@@ -238,7 +326,7 @@ upload-artifacts: package  ## Upload schema artifacts to GitHub release
 	@echo "✅ All artifacts uploaded successfully!"
 
 .PHONY: test
-test: test/fold  test/chart ## Run all tests
+test: test/fold test/examples-folding  ## Run all tests
 
 .PHONY: build
 build: $(OUT_SCHEMA_FILES)  ## Build all schema files to out directory

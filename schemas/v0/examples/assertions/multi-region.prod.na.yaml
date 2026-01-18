@@ -1,0 +1,19 @@
+id: global-service
+workloads:
+  global-api:
+    type: api
+    image:
+      repository: global-api-service
+    ingress:
+      pathPrefix: /api
+    replicas: 10
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    autoscaling:
+      horizontal:
+        minReplicas: 10
+        maxReplicas: 50
+    labels:
+      region: north-america

@@ -1,0 +1,88 @@
+id: ecommerce-platform
+workloads:
+  api-gateway:
+    type: api
+    image:
+      repository: ecommerce/api-gateway
+    ingress:
+      pathPrefix: /
+      fqdn: api.ecommerce.example.com
+    replicas: 3
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+    autoscaling:
+      horizontal:
+        minReplicas: 3
+        maxReplicas: 15
+    annotations:
+      apps.workleap.com/flavor: gateway
+  notification-worker:
+    type: worker
+    image:
+      repository: ecommerce/notification-service
+    replicas: 3
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    annotations:
+      apps.workleap.com/flavor: worker
+    autoscaling:
+      horizontal:
+        minReplicas: 3
+        maxReplicas: 8
+  order-service:
+    type: api
+    image:
+      repository: ecommerce/order-service
+    ingress:
+      pathPrefix: /orders
+    replicas: 6
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+    autoscaling:
+      horizontal:
+        minReplicas: 6
+        maxReplicas: 20
+  payment-worker:
+    type: worker
+    image:
+      repository: ecommerce/payment-processor
+    replicas: 4
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    annotations:
+      apps.workleap.com/flavor: worker
+      security.workleap.com/pci-dss: "true"
+  product-catalog:
+    type: api
+    image:
+      repository: ecommerce/product-catalog
+    ingress:
+      pathPrefix: /products
+    replicas: 5
+    resources:
+      requests:
+        cpu: 300m
+        memory: 384Mi
+  user-service:
+    type: api
+    image:
+      repository: ecommerce/user-service
+    ingress:
+      pathPrefix: /users
+    replicas: 4
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    autoscaling:
+      horizontal:
+        minReplicas: 4
+        maxReplicas: 10
