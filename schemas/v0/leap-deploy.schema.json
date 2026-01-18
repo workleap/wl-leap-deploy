@@ -6,7 +6,7 @@
   "type": "object",
   "examples": [
     {
-      "id": "my-application",
+      "id": "my-simple-application",
       "workloads": {
         "api": {
           "type": "api",

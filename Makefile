@@ -9,7 +9,6 @@ SCHEMAS_DIRECTORY := schemas
 SCHEMA_FILE_NAME := leap-deploy.schema.json
 FOLDED_SCHEMA_FILE_NAME := leap-deploy-folded.schema.json
 TESTS_DIRECTORY_NAME := tests
-ASSERTIONS_DIRECTORY_NAME := assertions
 
 SCHEMA_FILES := $(shell find $(SCHEMAS_DIRECTORY) -name '*.schema.json' -type f)
 
@@ -53,27 +52,22 @@ test/folding:  # Test folding and assert against expected outputs
 	@mkdir -p $(FOLD_TEST_OUTPUT)
 	@echo "Testing folding inputs against assertion files..."
 	@has_errors=0; \
-	for test in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*.yaml; do \
-		if [ -f "$$test" ]; then \
-			test_name=$$(basename "$$test" .yaml); \
-			test_dir=$$(dirname "$$test"); \
-			version_dir=$$(echo "$$test" | cut -d'/' -f2); \
+	for input_file in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*/input.yaml; do \
+		if [ -f "$$input_file" ]; then \
+			test_dir=$$(dirname "$$input_file"); \
+			test_name=$$(basename "$$test_dir"); \
+			version_dir=$$(echo "$$input_file" | cut -d'/' -f2); \
 			schema_dir="$(SCHEMAS_DIRECTORY)/$$version_dir"; \
 			folded_schema="$$schema_dir/$(FOLDED_SCHEMA_FILE_NAME)"; \
-			assertions_dir="$$test_dir/$(ASSERTIONS_DIRECTORY_NAME)"; \
-			if [ ! -d "$$assertions_dir" ]; then \
-				echo "⚠️  No assertions directory for $$test_dir, skipping..."; \
-				continue; \
-			fi; \
 			for env in $(FOLD_TEST_ENVIRONMENTS); do \
-				assertion_file="$$assertions_dir/$${test_name}.$${env}.yaml"; \
+				assertion_file="$$test_dir/$${env}.yaml"; \
 				if [ ! -f "$$assertion_file" ]; then \
 					echo "⚠️  Missing assertion file: $$assertion_file"; \
 					continue; \
 				fi; \
 				echo "Testing $$test_name for env=$$env (no region)..."; \
 				temp_file="$(FOLD_TEST_OUTPUT)/$$test_name-$$env.json"; \
-				$(FOLD_SCRIPT) "$$test" "$$env" "" false | jq . > "$$temp_file"; \
+				$(FOLD_SCRIPT) "$$input_file" "$$env" "" false | jq . > "$$temp_file"; \
 				folded_yaml=$$(cat "$$temp_file" | yq -P); \
 				assertion_content=$$(cat "$$assertion_file"); \
 				if [ "$$folded_yaml" != "$$assertion_content" ]; then \
@@ -94,14 +88,14 @@ test/folding:  # Test folding and assert against expected outputs
 					fi; \
 				fi; \
 				for region in $(FOLD_TEST_REGIONS); do \
-					assertion_file="$$assertions_dir/$${test_name}.$${env}.$${region}.yaml"; \
+					assertion_file="$$test_dir/$${env}.$${region}.yaml"; \
 					if [ ! -f "$$assertion_file" ]; then \
 						echo "⚠️  Missing assertion file: $$assertion_file"; \
 						continue; \
 					fi; \
 					echo "Testing $$test_name for env=$$env region=$$region..."; \
 					temp_file="$(FOLD_TEST_OUTPUT)/$$test_name-$$env-$$region.json"; \
-					$(FOLD_SCRIPT) "$$test" "$$env" "$$region" false | jq . > "$$temp_file"; \
+					$(FOLD_SCRIPT) "$$input_file" "$$env" "$$region" false | jq . > "$$temp_file"; \
 					folded_yaml=$$(cat "$$temp_file" | yq -P); \
 					assertion_content=$$(cat "$$assertion_file"); \
 					if [ "$$folded_yaml" != "$$assertion_content" ]; then \
@@ -127,11 +121,11 @@ test/folding:  # Test folding and assert against expected outputs
 	done; \
 	if [ $$has_errors -eq 1 ]; then \
 		echo ""; \
-		echo "❌ test folding tests failed"; \
+		echo "❌ Folding tests failed"; \
 		exit 1; \
 	else \
 		echo ""; \
-		echo "✅ All test folding tests passed!"; \
+		echo "✅ All folding tests passed!"; \
 	fi
 
 .PHONY: validate/metaschema
@@ -211,21 +205,21 @@ validate/versions:  # Validate that schema version patterns and $id are correct
 	@echo "All schema validations passed!"
 
 .PHONY: validate/tests
-validate/tests:  # Validate that test files are valid against the schema
-	@echo "Validating test files against schemas..."
+validate/tests:  # Validate that test input files are valid against the schema
+	@echo "Validating test input files against schemas..."
 	@has_errors=0; \
-	for test in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*.yaml; do \
-		if [ -f "$$test" ]; then \
-			version_dir=$$(echo "$$test" | cut -d'/' -f2); \
+	for input_file in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*/input.yaml; do \
+		if [ -f "$$input_file" ]; then \
+			version_dir=$$(echo "$$input_file" | cut -d'/' -f2); \
 			schema_dir="$(SCHEMAS_DIRECTORY)/$$version_dir"; \
 			schema_file="$$schema_dir/$(SCHEMA_FILE_NAME)"; \
-			echo "Validating $$test against $$schema_file..."; \
+			echo "Validating $$input_file against $$schema_file..."; \
 			temp_file="$$(mktemp)"; \
-			yq -o=json "$$test" > "$$temp_file"; \
+			yq -o=json "$$input_file" > "$$temp_file"; \
 			if ! $(JSONSCHEMA_BINARY) validate "$$schema_file" "$$temp_file" \
 				--resolve "$$schema_dir" \
 				--extension .schema.json; then \
-				echo "❌ VALIDATION FAILED: $$test"; \
+				echo "❌ VALIDATION FAILED: $$input_file"; \
 				has_errors=1; \
 			fi; \
 			rm -f "$$temp_file"; \
@@ -233,11 +227,11 @@ validate/tests:  # Validate that test files are valid against the schema
 	done; \
 	if [ $$has_errors -eq 1 ]; then \
 		echo ""; \
-		echo "❌ test validation failed"; \
+		echo "❌ Test validation failed"; \
 		exit 1; \
 	else \
 		echo ""; \
-		echo "✅ All tests are valid!"; \
+		echo "✅ All test inputs are valid!"; \
 	fi
 
 .PHONY: validate
