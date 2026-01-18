@@ -9,6 +9,7 @@ SCHEMAS_DIRECTORY := schemas
 SCHEMA_FILE_NAME := leap-deploy.schema.json
 FOLDED_SCHEMA_FILE_NAME := leap-deploy-folded.schema.json
 EXAMPLES_DIRECTORY_NAME := examples
+ASSERTIONS_DIRECTORY_NAME := assertions
 
 SCHEMA_FILES := $(shell find $(SCHEMAS_DIRECTORY) -name '*.schema.json' -type f)
 OUT_SCHEMA_FILES := $(addprefix $(OUT_DIR)/,$(SCHEMA_FILES))
@@ -52,62 +53,8 @@ install-cli:  ## Install the jsonschema CLI if not present
 		echo "jsonschema CLI already installed: $$($(JSONSCHEMA_BINARY) --version)"; \
 	fi
 
-.PHONY: test/fold
-test/fold:  # Test folding configurations and validating against folded schemas
-	@mkdir -p $(FOLD_TEST_OUTPUT)
-	@echo "Testing folding of configurations and results against schemas..."
-	@has_errors=0; \
-	for example in $(SCHEMAS_DIRECTORY)/v*/$(EXAMPLES_DIRECTORY_NAME)/*.yaml; do \
-		if [ -f "$$example" ]; then \
-			version_dir=$$(echo "$$example" | cut -d'/' -f2); \
-			version_number=$$(echo "$$version_dir" | sed 's/v//'); \
-			schema_dir="$(SCHEMAS_DIRECTORY)/$$version_dir"; \
-			folded_schema="$$schema_dir/$(FOLDED_SCHEMA_FILE_NAME)"; \
-		for env in $(FOLD_TEST_ENVIRONMENTS); do \
-			out_folded="$(FOLD_TEST_OUTPUT)/$$version_number-$$env.json"; \
-			echo "Folding $$example for environment $$env (no region)..."; \
-			if ! $(FOLD_SCRIPT) "$$example" $$env "" false | jq . > "$$out_folded"; then \
-				has_errors=1; \
-			else \
-				echo "Validating folded output against $$folded_schema..."; \
-				if ! $(JSONSCHEMA_BINARY) validate "$$folded_schema" "$$out_folded" \
-					--resolve "$$schema_dir" \
-					--extension .schema.json \
-					--verbose; then \
-					has_errors=1; \
-				fi; \
-			fi; \
-			for region in $(FOLD_TEST_REGIONS); do \
-				out_folded="$(FOLD_TEST_OUTPUT)/$$version_number-$$env-$$region.json"; \
-				echo "Folding $$example for environment $$env and region $$region..."; \
-				if ! $(FOLD_SCRIPT) "$$example" $$env $$region false | jq . > "$$out_folded"; then \
-					has_errors=1; \
-				else \
-					echo "Validating folded output against $$folded_schema..."; \
-					if ! $(JSONSCHEMA_BINARY) validate "$$folded_schema" "$$out_folded" \
-						--resolve "$$schema_dir" \
-						--extension .schema.json \
-						--verbose; then \
-						has_errors=1; \
-					fi; \
-				fi; \
-			done; \
-			done; \
-		fi; \
-	done; \
-	if [ $$has_errors -eq 1 ]; then \
-		echo ""; \
-		echo "❌ Validation failed for one or more schemas"; \
-		exit 1; \
-	else \
-		echo ""; \
-		echo "✅ All validations passed successfully!"; \
-	fi
-
-ASSERTIONS_DIRECTORY_NAME := assertions
-
-.PHONY: test/examples-folding
-test/examples-folding:  # Test folding examples and asserting against expected outputs
+.PHONY: test/folding
+test/folding:  # Test folding examples and asserting against expected outputs
 	@mkdir -p $(FOLD_TEST_OUTPUT)
 	@echo "Testing example folding against assertion files..."
 	@has_errors=0; \
@@ -326,7 +273,7 @@ upload-artifacts: package  ## Upload schema artifacts to GitHub release
 	@echo "✅ All artifacts uploaded successfully!"
 
 .PHONY: test
-test: test/fold test/examples-folding  ## Run all tests
+test: test/folding  ## Run all tests
 
 .PHONY: build
 build: $(OUT_SCHEMA_FILES)  ## Build all schema files to out directory
