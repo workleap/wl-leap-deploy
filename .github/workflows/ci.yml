@@ -45,5 +45,5 @@ jobs:
         uses: sourcemeta/jsonschema@v14.0.4
 
       - name: Fold configurations and validate results against schemas
-        run: make test/fold
+        run: make test/folding
 

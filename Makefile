@@ -183,7 +183,7 @@ lint: package  ## Lint schema files
 
 .PHONY: validate/versions
 validate/versions: package  # Test that schema version patterns and $id are correct
-	@echo "Testing schema version patterns and '$$id' fields..."
+	@echo "Testing schema version patterns and '\$$id' fields..."
 	@for schema in $(OUT_DIR)/$(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME) $(OUT_DIR)/$(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema" ]; then \
 			version_dir=$$(echo "$$schema" | cut -d'/' -f3); \
