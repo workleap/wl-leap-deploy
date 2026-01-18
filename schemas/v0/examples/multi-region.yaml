@@ -1,0 +1,77 @@
+# Multi-Region Example
+# ====================
+# Demonstrates region-specific configurations for NA (North America) and EU.
+# Different regions may have different scaling needs, compliance requirements,
+# or performance characteristics.
+
+id: global-service
+
+workloads:
+  global-api:
+    type: api
+
+    image:
+      repository: global-api-service
+
+    ingress:
+      pathPrefix: /api
+
+    # Base configuration
+    replicas: 3
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+
+    # Global environment overrides
+    environments:
+      prod:
+        replicas: 5
+        autoscaling:
+          horizontal:
+            minReplicas: 5
+            maxReplicas: 15
+
+    # Region-specific configurations
+    regions:
+      # North America - higher traffic region
+      na:
+        # NA-specific base settings
+        labels:
+          region: north-america
+
+        environments:
+          prod:
+            # NA prod handles more traffic
+            replicas: 10
+            resources:
+              requests:
+                cpu: 500m
+                memory: 512Mi
+            autoscaling:
+              horizontal:
+                minReplicas: 10
+                maxReplicas: 50
+
+      # Europe - GDPR compliance requirements
+      eu:
+        labels:
+          region: europe
+          data-residency: eu
+
+        environments:
+          staging:
+            labels:
+              compliance: gdpr-test
+
+          prod:
+            replicas: 8
+            labels:
+              compliance: gdpr
+              data-residency: eu
+            annotations:
+              security.workleap.com/gdpr: "true"
+            autoscaling:
+              horizontal:
+                minReplicas: 8
+                maxReplicas: 30

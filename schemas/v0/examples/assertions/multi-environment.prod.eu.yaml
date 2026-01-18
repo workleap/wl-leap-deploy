@@ -1,0 +1,23 @@
+id: multi-env-service
+workloads:
+  api-gateway:
+    type: api
+    image:
+      repository: api-gateway
+    ingress:
+      pathPrefix: /gateway
+    replicas: 5
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    autoscaling:
+      horizontal:
+        minReplicas: 5
+        maxReplicas: 20
+    labels:
+      environment: production
+      tier: critical
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9090"

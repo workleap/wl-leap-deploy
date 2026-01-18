@@ -1,0 +1,54 @@
+# API and Worker Pair Example
+# ===========================
+# A common pattern where an API service is paired with a background worker.
+# The API handles incoming requests while the worker processes async jobs.
+
+id: order-processing-system
+
+workloads:
+  # Public-facing API that receives orders
+  orders-api:
+    type: api
+
+    image:
+      repository: order-service
+
+    replicas: 3
+
+    ingress:
+      pathPrefix: /orders
+      fqdn: orders.example.com
+
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+
+    autoscaling:
+      horizontal:
+        minReplicas: 3
+        maxReplicas: 10
+
+  # Background worker that processes orders asynchronously
+  orders-worker:
+    type: worker
+
+    image:
+      repository: order-service
+
+    replicas: 2
+
+    ingress: null
+
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+
+    annotations:
+      apps.workleap.com/flavor: worker
+
+    autoscaling:
+      horizontal:
+        minReplicas: 2
+        maxReplicas: 6

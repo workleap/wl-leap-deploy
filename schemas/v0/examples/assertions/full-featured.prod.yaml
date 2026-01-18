@@ -1,0 +1,61 @@
+id: full-featured-application
+workloads:
+  background-processor:
+    type: worker
+    image:
+      registry: myregistry.azurecr.io
+      repository: myorg/background-processor
+      tag: v2.5.0
+    replicas: 4
+    resources:
+      requests:
+        cpu: "1"
+        memory: 1Gi
+    autoscaling:
+      vertical:
+        enabled: true
+      horizontal:
+        enabled: true
+        minReplicas: 4
+        maxReplicas: 20
+    labels:
+      app: background-processor
+      version: v2
+      team: backend
+      tier: backend
+    annotations:
+      apps.workleap.com/flavor: worker
+      prometheus.io/scrape: "true"
+  main-api:
+    type: api
+    image:
+      registry: myregistry.azurecr.io
+      repository: myorg/main-api
+      tag: v2.5.0
+    replicas: 5
+    ingress:
+      pathPrefix: /api/v2
+      fqdn: api.myapp.example.com
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    autoscaling:
+      vertical:
+        enabled: false
+      horizontal:
+        enabled: true
+        minReplicas: 5
+        maxReplicas: 25
+    labels:
+      app: main-api
+      version: v2
+      team: backend
+      tier: frontend
+      environment: production
+      sla: high
+    annotations:
+      apps.workleap.com/flavor: api
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"
+      prometheus.io/path: /metrics

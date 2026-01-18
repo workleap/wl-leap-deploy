@@ -1,0 +1,33 @@
+id: order-processing-system
+workloads:
+  orders-api:
+    type: api
+    image:
+      repository: order-service
+    replicas: 3
+    ingress:
+      pathPrefix: /orders
+      fqdn: orders.example.com
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+    autoscaling:
+      horizontal:
+        minReplicas: 3
+        maxReplicas: 10
+  orders-worker:
+    type: worker
+    image:
+      repository: order-service
+    replicas: 2
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    annotations:
+      apps.workleap.com/flavor: worker
+    autoscaling:
+      horizontal:
+        minReplicas: 2
+        maxReplicas: 6

@@ -34,13 +34,13 @@ runs:
       id: fold
       shell: bash
       env:
-        ACTION_PATH: ${{ github.action_path }}
+        SCRIPTS_PATH: ${{ github.action_path }}/scripts
         FILE_PATH: ${{ inputs.file-path }}
         ENVIRONMENT: ${{ inputs.environment }}
         REGION: ${{ inputs.region }}
       run: |
         # Output 1: Run without show-sources for clean config and compact with jq -c
-        CONFIG=$("$ACTION_PATH/fold-config.sh" \
+        CONFIG=$("$SCRIPTS_PATH/fold-config.sh" \
           "$FILE_PATH" \
           "$ENVIRONMENT" \
           "$REGION" \
@@ -56,11 +56,11 @@ runs:
         echo "EOF" >> $GITHUB_OUTPUT
         
         # Output 2: Run with show-sources and pipe through show-sources.sh
-        CONFIG_SOURCES=$("$ACTION_PATH/fold-config.sh" \
+        CONFIG_SOURCES=$("$SCRIPTS_PATH/fold-config.sh" \
           "$FILE_PATH" \
           "$ENVIRONMENT" \
           "$REGION" \
-          "true" | "$ACTION_PATH/show-sources.sh")
+          "true" | "$SCRIPTS_PATH/show-sources.sh")
         echo "config-sources<<EOF" >> $GITHUB_OUTPUT
         echo "$CONFIG_SOURCES" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT

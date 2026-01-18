@@ -1,0 +1,69 @@
+# Multi-Environment Example
+# =========================
+# Demonstrates environment-specific configurations for dev, staging, and prod.
+# Each environment has different resource allocations and scaling settings.
+
+id: multi-env-service
+
+workloads:
+  api-gateway:
+    type: api
+
+    image:
+      repository: api-gateway
+
+    ingress:
+      pathPrefix: /gateway
+
+    # Base configuration (used as defaults)
+    replicas: 2
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+    # Environment-specific overrides
+    environments:
+      # Development: minimal resources for cost savings
+      dev:
+        replicas: 1
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        autoscaling:
+          horizontal:
+            enabled: false
+
+      # Staging: moderate resources for testing
+      staging:
+        replicas: 2
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        autoscaling:
+          horizontal:
+            minReplicas: 2
+            maxReplicas: 4
+        labels:
+          environment: staging
+          team: platform
+
+      # Production: full resources and scaling
+      prod:
+        replicas: 5
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        autoscaling:
+          horizontal:
+            minReplicas: 5
+            maxReplicas: 20
+        labels:
+          environment: production
+          tier: critical
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "9090"

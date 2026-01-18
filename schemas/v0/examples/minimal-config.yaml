@@ -1,0 +1,12 @@
+# Minimal Configuration Example
+# =============================
+# The absolute minimum configuration required for a valid leap-deploy.yaml.
+# Only required fields are specified; all optional fields use defaults.
+
+id: minimal-app
+
+workloads:
+  my-service:
+    type: api
+    image:
+      repository: my-service

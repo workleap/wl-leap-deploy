@@ -1,0 +1,202 @@
+# Full-Featured Example
+# =====================
+# Demonstrates all available configuration options in the schema.
+# Use this as a reference for all possible settings.
+
+id: full-featured-application
+
+workloads:
+  # Primary API with all options configured
+  main-api:
+    type: api
+
+    # Image configuration
+    image:
+      registry: myregistry.azurecr.io
+      repository: myorg/main-api
+      tag: v2.5.0
+
+    # Base replicas
+    replicas: 3
+
+    # Ingress configuration
+    ingress:
+      pathPrefix: /api/v2
+      fqdn: api.myapp.example.com
+
+    # Resource requests
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+    # Autoscaling configuration
+    autoscaling:
+      vertical:
+        enabled: false
+      horizontal:
+        enabled: true
+        minReplicas: 3
+        maxReplicas: 12
+
+    # Kubernetes labels
+    labels:
+      app: main-api
+      version: v2
+      team: backend
+      tier: frontend
+
+    # Kubernetes annotations
+    annotations:
+      apps.workleap.com/flavor: api
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"
+      prometheus.io/path: /metrics
+
+    # Environment-specific overrides
+    environments:
+      dev:
+        replicas: 1
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        autoscaling:
+          horizontal:
+            enabled: false
+        labels:
+          environment: development
+        annotations:
+          logging.workleap.com/level: debug
+
+      staging:
+        replicas: 2
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        autoscaling:
+          horizontal:
+            minReplicas: 2
+            maxReplicas: 4
+        labels:
+          environment: staging
+
+      prod:
+        replicas: 5
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        autoscaling:
+          horizontal:
+            minReplicas: 5
+            maxReplicas: 25
+        labels:
+          environment: production
+          sla: high
+
+    # Region-specific overrides
+    regions:
+      na:
+        labels:
+          region: north-america
+          datacenter: us-east-1
+
+        environments:
+          prod:
+            replicas: 10
+            resources:
+              requests:
+                cpu: 750m
+                memory: 768Mi
+            autoscaling:
+              horizontal:
+                minReplicas: 10
+                maxReplicas: 50
+            labels:
+              traffic-zone: primary
+
+      eu:
+        labels:
+          region: europe
+          datacenter: eu-west-1
+          data-residency: eu
+
+        environments:
+          prod:
+            replicas: 8
+            autoscaling:
+              horizontal:
+                minReplicas: 8
+                maxReplicas: 40
+            labels:
+              compliance: gdpr
+            annotations:
+              security.workleap.com/gdpr: "true"
+              security.workleap.com/data-encryption: "true"
+
+  # Fully-configured worker
+  background-processor:
+    type: worker
+
+    image:
+      registry: myregistry.azurecr.io
+      repository: myorg/background-processor
+      tag: v2.5.0
+
+    replicas: 2
+
+    # Workers don't have ingress
+    ingress: null
+
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+
+    autoscaling:
+      vertical:
+        enabled: true
+      horizontal:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 10
+
+    labels:
+      app: background-processor
+      version: v2
+      team: backend
+      tier: backend
+
+    annotations:
+      apps.workleap.com/flavor: worker
+      prometheus.io/scrape: "true"
+
+    environments:
+      dev:
+        replicas: 1
+        autoscaling:
+          horizontal:
+            enabled: false
+
+      prod:
+        replicas: 4
+        resources:
+          requests:
+            cpu: "1"
+            memory: 1Gi
+        autoscaling:
+          horizontal:
+            minReplicas: 4
+            maxReplicas: 20
+
+    regions:
+      na:
+        environments:
+          prod:
+            replicas: 6
+            autoscaling:
+              horizontal:
+                minReplicas: 6
+                maxReplicas: 30

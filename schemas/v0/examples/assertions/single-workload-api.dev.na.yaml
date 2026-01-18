@@ -1,0 +1,20 @@
+id: my-api-service
+workloads:
+  my-api:
+    type: api
+    image:
+      repository: my-api-service
+      tag: latest
+    replicas: 2
+    ingress:
+      pathPrefix: /api
+      fqdn: api.example.com
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    autoscaling:
+      horizontal:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 5

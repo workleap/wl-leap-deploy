@@ -1,0 +1,23 @@
+id: global-service
+workloads:
+  global-api:
+    type: api
+    image:
+      repository: global-api-service
+    ingress:
+      pathPrefix: /api
+    replicas: 8
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+    autoscaling:
+      horizontal:
+        minReplicas: 8
+        maxReplicas: 30
+    labels:
+      region: europe
+      data-residency: eu
+      compliance: gdpr
+    annotations:
+      security.workleap.com/gdpr: "true"
