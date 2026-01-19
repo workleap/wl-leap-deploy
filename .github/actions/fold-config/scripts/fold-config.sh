@@ -1,1 +1,1 @@
-/Users/pierre-luc.ledoux/repos/workleap/wl-leap-deploy/scripts/fold-config.sh
+../../../../scripts/fold-config.sh
