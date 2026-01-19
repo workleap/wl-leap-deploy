@@ -16,6 +16,7 @@ FOLD_SCRIPT := scripts/fold-config.sh
 FOLD_TEST_ENVIRONMENTS := dev staging prod
 FOLD_TEST_REGIONS := na eu
 FOLD_TEST_OUTPUT := $(OUT_DIR)/folded
+ARTIFACTS_OUTPUT := $(OUT_DIR)/artifacts
 
 JSONSCHEMA_VERSION := 14.1.0
 JSONSCHEMA_BINARY := npx -- @sourcemeta/jsonschema@$(JSONSCHEMA_VERSION)
@@ -269,21 +270,21 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 	else \
 		echo "🏠 Running locally - commands will be echoed but not executed"; \
 	fi
+	@mkdir -p $(ARTIFACTS_OUTPUT)
 	@echo "Uploading artifacts to release $${LATEST_RELEASE}..."
 	@for schema_version in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
 		latest_release=$${LATEST_RELEASE:-unset}; \
 		if [ -f "$$schema_version" ]; then \
 			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
 			target_name="leap-deploy.$$version.schema.json"; \
-			echo "  Uploading $$schema_version as $$target_name"; \
+			target_path="$(ARTIFACTS_OUTPUT)/$$target_name"; \
+			echo "  Preparing $$schema_version as $$target_name"; \
+			cp "$$schema_version" "$$target_path"; \
 			if [ "$$CI" = "true" ]; then \
-				cp "$$schema_version" "$$target_name"; \
-				gh release upload $${latest_release} "$$target_name"; \
-				rm "$$target_name"; \
+				echo "  Uploading $$target_path"; \
+				gh release upload $${latest_release} "$$target_path"; \
 			else \
-				echo "    [DRY RUN] cp \"$$schema_version\" \"$$target_name\""; \
-				echo "    [DRY RUN] gh release upload $${latest_release} \"$$target_name\""; \
-				echo "    [DRY RUN] rm \"$$target_name\""; \
+				echo "    [DRY RUN] gh release upload $${latest_release} \"$$target_path\""; \
 			fi; \
 		fi; \
 	done
@@ -292,18 +293,17 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 		if [ -f "$$schema_version" ]; then \
 			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
 			target_name="leap-deploy-folded.$$version.schema.json"; \
+			target_path="$(ARTIFACTS_OUTPUT)/$$target_name"; \
 			main_schema_artifact="leap-deploy.$$version.schema.json"; \
 			release_url="https://github.com/$(GITHUB_REPOSITORY)/releases/download/$${latest_release}/$$main_schema_artifact"; \
 			current_ref=$$(jq -r '.properties.workloads.additionalProperties."$$ref"' "$$schema_version" | sed 's|#.*||'); \
-			echo "  Uploading $$schema_version as $$target_name (with rewritten \$$ref)"; \
+			echo "  Preparing $$schema_version as $$target_name (with rewritten \$$ref)"; \
+			sed "s|$$current_ref|$$release_url|" "$$schema_version" > "$$target_path"; \
 			if [ "$$CI" = "true" ]; then \
-				sed "s|$$current_ref|$$release_url|" "$$schema_version" > "$$target_name"; \
-				gh release upload $${latest_release} "$$target_name"; \
-				rm "$$target_name"; \
+				echo "  Uploading $$target_path"; \
+				gh release upload $${latest_release} "$$target_path"; \
 			else \
-				echo "    [DRY RUN] sed \"s|$$current_ref|$$release_url|\" \"$$schema_version\" > \"$$target_name\""; \
-				echo "    [DRY RUN] gh release upload $${latest_release} \"$$target_name\""; \
-				echo "    [DRY RUN] rm \"$$target_name\""; \
+				echo "    [DRY RUN] gh release upload $${latest_release} \"$$target_path\""; \
 			fi; \
 		fi; \
 	done
