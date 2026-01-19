@@ -3,6 +3,8 @@ SHELL := /bin/bash
 .SHELLFLAGS := -euo pipefail -c
 	
 OUT_DIR := out
+BIN_DIR := bin
+
 BANNER := .workleap
 
 SCHEMAS_DIRECTORY := schemas
@@ -19,7 +21,8 @@ FOLD_TEST_OUTPUT := $(OUT_DIR)/folded
 ARTIFACTS_OUTPUT := $(OUT_DIR)/artifacts
 
 JSONSCHEMA_VERSION := 14.1.0
-JSONSCHEMA_BINARY := npx -- @sourcemeta/jsonschema@$(JSONSCHEMA_VERSION)
+JSONSCHEMA_NPM_PACKAGE := @sourcemeta/jsonschema
+JSONSCHEMA_BINARY := $(BIN_DIR)/node_modules/.bin/jsonschema
 
 # GitHub repository info (inferred from environment or defaults for local)
 GITHUB_REPOSITORY ?= workleap/wl-leap-deploy
@@ -32,8 +35,17 @@ all: validate lint test
 banner: $(BANNER)
 	@cat $(BANNER)
 
+.PHONY: jsonschema-cli
+jsonschema-cli:  ## Install the jsonschema CLI if not present
+	@if ! command -v $(JSONSCHEMA_BINARY) &> /dev/null; then \
+		echo "Installing jsonschema CLI v$(JSONSCHEMA_VERSION)..."; \
+		npm install --prefix "$(BIN_DIR)" @sourcemeta/jsonschema@14.1.0; \
+	else \
+		echo "jsonschema CLI already installed: $$($(JSONSCHEMA_BINARY) --version)"; \
+	fi
+
 .PHONY: test/folding
-test/folding:  # Test folding and assert against expected outputs
+test/folding: jsonschema-cli  # Test folding and assert against expected outputs
 	@mkdir -p $(FOLD_TEST_OUTPUT)
 	@echo "Testing folding inputs against assertion files..."
 	@has_errors=0; \
@@ -114,7 +126,7 @@ test/folding:  # Test folding and assert against expected outputs
 	fi
 
 .PHONY: validate/metaschema
-validate/metaschema:  # Validate that schema files are valid JSON Schema
+validate/metaschema: jsonschema-cli  # Validate that schema files are valid JSON Schema
 	@echo "Validating schema files against their metaschemas..."
 	@has_errors=0; \
 	for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
@@ -135,7 +147,7 @@ validate/metaschema:  # Validate that schema files are valid JSON Schema
 	fi
 
 .PHONY: lint
-lint:  ## Lint schema files
+lint: jsonschema-cli  ## Lint schema files
 	@echo "Linting schema files..."
 	@has_errors=0; \
 	for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
@@ -156,7 +168,7 @@ lint:  ## Lint schema files
 	fi
 
 .PHONY: validate/versions
-validate/versions:  # Validate that schema version patterns and $id are correct
+validate/versions: jsonschema-cli  # Validate that schema version patterns and $id are correct
 	@echo "Testing schema version patterns and '\$$id' fields..."
 	@for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME) $(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema" ]; then \
@@ -190,7 +202,7 @@ validate/versions:  # Validate that schema version patterns and $id are correct
 	@echo "All schema validations passed!"
 
 .PHONY: validate/tests
-validate/tests:  # Validate that test input files are valid against the schema
+validate/tests: jsonschema-cli  # Validate that test input files are valid against the schema
 	@echo "Validating test input files against schemas..."
 	@has_errors=0; \
 	for input_file in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*/input.yaml; do \
@@ -220,7 +232,7 @@ validate/tests:  # Validate that test input files are valid against the schema
 	fi
 
 .PHONY: validate/tests/assertions
-validate/tests/assertions:  # Validate that test assertion files are valid against the folded schema
+validate/tests/assertions: jsonschema-cli  # Validate that test assertion files are valid against the folded schema
 	@echo "Validating test assertion files against folded schema..."
 	@has_errors=0; \
 	for test_dir in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*/; do \
