@@ -167,6 +167,18 @@ lint: jsonschema-cli  ## Lint schema files
 		echo "✅ All schemas linted successfully!"; \
 	fi
 
+.PHONY: format
+format: jsonschema-cli  ## Format schema files
+	@echo "Formatting schema files..."
+	@for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
+		if [ -d "$$schema_dir" ]; then \
+			echo "Formatting schemas in $$schema_dir..."; \
+			$(JSONSCHEMA_BINARY) fmt "$$schema_dir"*.schema.json; \
+		fi; \
+	done
+	@echo ""
+	@echo "✅ All schemas formatted successfully!"
+
 .PHONY: validate/versions
 validate/versions: jsonschema-cli  # Validate that schema version patterns and $id are correct
 	@echo "Testing schema version patterns and '\$$id' fields..."
