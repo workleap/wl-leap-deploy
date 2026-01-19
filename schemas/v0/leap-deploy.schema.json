@@ -1,9 +1,8 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.workleap.com/leap-deploy/v0/schema.json",
   "title": "Leap Deploy Configuration",
   "description": "Schema for leap-deploy.yaml configuration file",
-  "type": "object",
   "examples": [
     {
       "id": "my-simple-application",
@@ -33,16 +32,24 @@
         "api": {
           "type": "api",
           "replicas": 2,
-          "image": { "repository": "my-api" },
-          "ingress": { "pathPrefix": "/api" },
+          "image": {
+            "repository": "my-api"
+          },
+          "ingress": {
+            "pathPrefix": "/api"
+          },
           "environments": {
-            "prod": { "replicas": 3 }
+            "prod": {
+              "replicas": 3
+            }
           },
           "regions": {
             "eu": {
               "replicas": 1,
               "environments": {
-                "prod": { "replicas": 2 }
+                "prod": {
+                  "replicas": 2
+                }
               }
             }
           }
@@ -50,15 +57,23 @@
         "worker": {
           "type": "worker",
           "replicas": 1,
-          "image": { "repository": "my-worker" },
+          "image": {
+            "repository": "my-worker"
+          },
           "environments": {
-            "staging": { "replicas": 2 },
-            "prod": { "replicas": 3 }
+            "staging": {
+              "replicas": 2
+            },
+            "prod": {
+              "replicas": 3
+            }
           },
           "regions": {
             "na": {
               "environments": {
-                "prod": { "replicas": 5 }
+                "prod": {
+                  "replicas": 5
+                }
               }
             }
           }
@@ -66,72 +81,71 @@
       }
     }
   ],
+  "type": "object",
+  "required": [ "id", "workloads" ],
   "properties": {
     "version": {
+      "description": "Schema version - must be a v0 version (e.g., 0, 0.1, 0.1.0)",
       "type": "string",
-      "pattern": "^0(\\.[0-9]+){0,2}$",
-      "description": "Schema version - must be a v0 version (e.g., 0, 0.1, 0.1.0)"
+      "pattern": "^0(\\.[0-9]+){0,2}$"
     },
     "id": {
-      "type": "string",
-      "description": "Unique identifier for this deployment configuration"
+      "description": "Unique identifier for this deployment configuration",
+      "type": "string"
     },
     "workloads": {
       "description": "Map of workload names to their configurations",
       "type": "object",
+      "minProperties": 1,
       "additionalProperties": {
         "allOf": [
-          { "$ref": "#/definitions/workloadConfigWithOverrides" },
-          { "$ref": "#/definitions/requiredRootWorkloadConfigConstraints" }
+          {
+            "$ref": "#/$defs/workloadConfigWithOverrides"
+          },
+          {
+            "$ref": "#/$defs/requiredRootWorkloadConfigConstraints"
+          }
         ]
-      },
-      "minProperties": 1
+      }
     }
   },
-  "required": ["id", "workloads"],
   "additionalProperties": false,
-  "definitions": {
+  "$defs": {
     "requiredRootWorkloadConfigConstraints": {
       "type": "object",
+      "required": [ "type" ],
       "properties": {
         "type": {}
-      },
-      "required": ["type"]
-    },
-    "foldedWorkloadConfigConstraints": {
-      "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/requiredRootWorkloadConfigConstraints" }
-      ]
+      }
     },
     "imageConfig": {
       "type": "object",
       "properties": {
         "registry": {
-          "type": "string",
-          "description": "Container registry hostname"
+          "description": "Container registry hostname",
+          "type": "string"
         },
         "repository": {
-          "type": "string",
-          "description": "Image repository name"
+          "description": "Image repository name",
+          "type": "string"
         },
         "tag": {
-          "type": "string",
-          "description": "Image tag"
+          "description": "Image tag",
+          "type": "string"
         }
       },
       "additionalProperties": false
     },
     "ingressConfig": {
-      "type": ["object", "null"],
+      "type": [ "object", "null" ],
       "properties": {
         "pathPrefix": {
-          "type": "string",
-          "description": "Ingress path prefix"
+          "description": "Ingress path prefix",
+          "type": "string"
         },
         "fqdn": {
-          "type": "string",
-          "description": "Fully qualified domain name"
+          "description": "Fully qualified domain name",
+          "type": "string"
         }
       },
       "additionalProperties": false
@@ -143,8 +157,8 @@
           "type": "object",
           "properties": {
             "enabled": {
-              "type": "boolean",
-              "default": false
+              "default": false,
+              "type": "boolean"
             }
           },
           "additionalProperties": false
@@ -153,18 +167,18 @@
           "type": "object",
           "properties": {
             "enabled": {
-              "type": "boolean",
-              "default": true
+              "default": true,
+              "type": "boolean"
             },
             "minReplicas": {
+              "default": 2,
               "type": "integer",
-              "minimum": 1,
-              "default": 2
+              "minimum": 1
             },
             "maxReplicas": {
+              "default": 3,
               "type": "integer",
-              "minimum": 1,
-              "default": 3
+              "minimum": 1
             }
           },
           "additionalProperties": false
@@ -172,47 +186,39 @@
       },
       "additionalProperties": false
     },
-    "foldedWorkloadConfig": {
-      "description": "Resulting Workload configuration with all overrides applied for the target environment and region - includes required fields",
-      "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/workloadConfig" },
-        { "$ref": "#/definitions/foldedWorkloadConfigConstraints" }
-      ]
-    },
     "workloadConfig": {
       "type": "object",
       "properties": {
         "type": {
-          "enum": ["api", "worker"],
-          "description": "Workload type - either 'api' for API services or 'worker' for background workers"
+          "description": "Workload type - either 'api' for API services or 'worker' for background workers",
+          "enum": [ "api", "worker" ]
         },
         "annotations": {
+          "description": "Kubernetes annotations",
           "type": "object",
           "additionalProperties": {
             "type": "string"
-          },
-          "description": "Kubernetes annotations"
+          }
         },
         "labels": {
+          "description": "Kubernetes labels",
           "type": "object",
           "additionalProperties": {
             "type": "string"
-          },
-          "description": "Kubernetes labels"
+          }
         },
         "replicas": {
-          "type": "integer",
-          "minimum": 1,
           "description": "Number of replicas",
-          "default": 2
+          "default": 2,
+          "type": "integer",
+          "minimum": 1
         },
         "autoscaling": {
-          "$ref": "#/definitions/autoscalingConfig"
+          "$ref": "#/$defs/autoscalingConfig"
         },
         "resources": {
-          "type": "object",
           "description": "Resource requests for the workload",
+          "type": "object",
           "properties": {
             "requests": {
               "type": "object",
@@ -232,40 +238,34 @@
           "additionalProperties": false
         },
         "image": {
-          "$ref": "#/definitions/imageConfig"
+          "$ref": "#/$defs/imageConfig"
         },
         "ingress": {
-          "$ref": "#/definitions/ingressConfig",
-          "default": null
+          "default": null,
+          "$ref": "#/$defs/ingressConfig"
         }
       }
     },
     "workloadConfigWithEnvironmentOverrides": {
-      "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/workloadConfig" }
-      ],
+      "$ref": "#/$defs/workloadConfig",
       "properties": {
         "environments": {
-          "type": "object",
           "description": "Environment-specific overrides within a region",
+          "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/workloadConfig"
+            "$ref": "#/$defs/workloadConfig"
           }
         }
       }
     },
     "workloadConfigWithOverrides": {
-      "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/workloadConfigWithEnvironmentOverrides" }
-      ],
+      "$ref": "#/$defs/workloadConfigWithEnvironmentOverrides",
       "properties": {
         "regions": {
-          "type": "object",
           "description": "Region-specific overrides (na, eu, etc.)",
+          "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/workloadConfigWithEnvironmentOverrides"
+            "$ref": "#/$defs/workloadConfigWithEnvironmentOverrides"
           }
         }
       }

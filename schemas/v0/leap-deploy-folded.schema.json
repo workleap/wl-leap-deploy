@@ -1,9 +1,8 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.workleap.com/leap-deploy/v0/leap-deploy-folded.schema.json",
   "title": "Folded Workload Configuration",
   "description": "Schema for validating folded/resolved workload configurations with all overrides applied",
-  "type": "object",
   "examples": [
     {
       "id": "my-application",
@@ -77,24 +76,42 @@
       }
     }
   ],
+  "type": "object",
+  "required": [ "id", "workloads" ],
   "properties": {
     "version": {
+      "description": "Schema version - must be a v0 version (e.g., 0, 0.1, 0.1.0)",
       "type": "string",
-      "pattern": "^0(\\.[0-9]+){0,2}$",
-      "description": "Schema version - must be a v0 version (e.g., 0, 0.1, 0.1.0)"
+      "pattern": "^0(\\.[0-9]+){0,2}$"
     },
     "id": {
-      "type": "string",
-      "description": "Unique identifier for this deployment configuration"
+      "description": "Unique identifier for this deployment configuration",
+      "type": "string"
     },
     "workloads": {
-      "type": "object",
       "description": "Map of workload names to their folded configurations",
+      "type": "object",
       "additionalProperties": {
-        "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/definitions/foldedWorkloadConfig"
+        "$ref": "#/$defs/foldedWorkloadConfig"
       }
     }
   },
-  "required": ["id", "workloads"],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "foldedWorkloadConfigConstraints": {
+      "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/$defs/requiredRootWorkloadConfigConstraints"
+    },
+    "foldedWorkloadConfig": {
+      "description": "Resulting Workload configuration with all overrides applied for the target environment and region - includes required fields",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/$defs/workloadConfig"
+        },
+        {
+          "$ref": "#/$defs/foldedWorkloadConfigConstraints"
+        }
+      ]
+    }
+  }
 }
