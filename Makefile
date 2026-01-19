@@ -35,8 +35,7 @@ all: validate lint test
 banner: $(BANNER)
 	@cat $(BANNER)
 
-.PHONY: jsonschema-cli
-jsonschema-cli:  ## Install the jsonschema CLI if not present
+$(JSONSCHEMA_BINARY):  ## Install the jsonschema CLI if not present
 	@if ! command -v $(JSONSCHEMA_BINARY) &> /dev/null; then \
 		echo "Installing jsonschema CLI v$(JSONSCHEMA_VERSION)..."; \
 		npm install --prefix "$(BIN_DIR)" @sourcemeta/jsonschema@14.1.0; \
@@ -45,7 +44,7 @@ jsonschema-cli:  ## Install the jsonschema CLI if not present
 	fi
 
 .PHONY: test/folding
-test/folding: jsonschema-cli  # Test folding and assert against expected outputs
+test/folding: $(JSONSCHEMA_BINARY)  # Test folding and assert against expected outputs
 	@mkdir -p $(FOLD_TEST_OUTPUT)
 	@echo "Testing folding inputs against assertion files..."
 	@has_errors=0; \
@@ -126,7 +125,7 @@ test/folding: jsonschema-cli  # Test folding and assert against expected outputs
 	fi
 
 .PHONY: validate/metaschema
-validate/metaschema: jsonschema-cli  # Validate that schema files are valid JSON Schema
+validate/metaschema: $(JSONSCHEMA_BINARY)  # Validate that schema files are valid JSON Schema
 	@echo "Validating schema files against their metaschemas..."
 	@has_errors=0; \
 	for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
@@ -147,7 +146,7 @@ validate/metaschema: jsonschema-cli  # Validate that schema files are valid JSON
 	fi
 
 .PHONY: lint
-lint: jsonschema-cli  ## Lint schema files
+lint: $(JSONSCHEMA_BINARY)  ## Lint schema files
 	@echo "Linting schema files..."
 	@has_errors=0; \
 	for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
@@ -168,7 +167,7 @@ lint: jsonschema-cli  ## Lint schema files
 	fi
 
 .PHONY: format
-format: jsonschema-cli  ## Format schema files
+format: $(JSONSCHEMA_BINARY)  ## Format schema files
 	@echo "Formatting schema files..."
 	@for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
 		if [ -d "$$schema_dir" ]; then \
@@ -180,7 +179,7 @@ format: jsonschema-cli  ## Format schema files
 	@echo "✅ All schemas formatted successfully!"
 
 .PHONY: validate/versions
-validate/versions: jsonschema-cli  # Validate that schema version patterns and $id are correct
+validate/versions: $(JSONSCHEMA_BINARY)  # Validate that schema version patterns and $id are correct
 	@echo "Testing schema version patterns and '\$$id' fields..."
 	@for schema in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME) $(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
 		if [ -f "$$schema" ]; then \
@@ -214,7 +213,7 @@ validate/versions: jsonschema-cli  # Validate that schema version patterns and $
 	@echo "All schema validations passed!"
 
 .PHONY: validate/tests
-validate/tests: jsonschema-cli  # Validate that test input files are valid against the schema
+validate/tests: $(JSONSCHEMA_BINARY)  # Validate that test input files are valid against the schema
 	@echo "Validating test input files against schemas..."
 	@has_errors=0; \
 	for input_file in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*/input.yaml; do \
@@ -244,7 +243,7 @@ validate/tests: jsonschema-cli  # Validate that test input files are valid again
 	fi
 
 .PHONY: validate/tests/assertions
-validate/tests/assertions: jsonschema-cli  # Validate that test assertion files are valid against the folded schema
+validate/tests/assertions: $(JSONSCHEMA_BINARY)  # Validate that test assertion files are valid against the folded schema
 	@echo "Validating test assertion files against folded schema..."
 	@has_errors=0; \
 	for test_dir in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*/; do \
@@ -304,7 +303,7 @@ define process_schema_artifact
 endef
 
 .PHONY: upload-artifacts
-upload-artifacts: jsonschema-cli  ## Upload schema artifacts to GitHub release
+upload-artifacts: $(JSONSCHEMA_BINARY)  ## Upload schema artifacts to GitHub release
 	@if [ "$$CI" = "true" ]; then \
 		if [ -z "$$LATEST_RELEASE" ]; then \
 			echo "❌ ERROR: LATEST_RELEASE environment variable is not set"; \
