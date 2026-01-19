@@ -1,0 +1,6 @@
+id: minimal-app
+workloads:
+  my-service:
+    type: api
+    image:
+      repository: my-service

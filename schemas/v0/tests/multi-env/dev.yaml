@@ -1,0 +1,16 @@
+id: multi-env-service
+workloads:
+  api-gateway:
+    type: api
+    image:
+      repository: api-gateway
+    ingress:
+      pathPrefix: /gateway
+    replicas: 1
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+    autoscaling:
+      horizontal:
+        enabled: false

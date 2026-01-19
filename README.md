@@ -165,7 +165,6 @@ This repository provides several reusable GitHub Actions for working with `leap-
 
 - **[validate](.github/actions/validate/README.md)** - Validates `leap-deploy.yaml` against the predefined schema to ensure correctness
 - **[fold-config](.github/actions/fold-config/README.md)** - Folds configuration by merging workload configs for a specific environment and region
-- **[generate-chart](.github/actions/generate-chart/README.md)** - Generates a Helm chart based on the folded configuration
 
 ## Examples
 

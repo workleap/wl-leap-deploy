@@ -1,0 +1,13 @@
+id: global-service
+workloads:
+  global-api:
+    type: api
+    image:
+      repository: global-api-service
+    ingress:
+      pathPrefix: /api
+    replicas: 3
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
