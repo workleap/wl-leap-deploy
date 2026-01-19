@@ -280,8 +280,31 @@ validate/tests/assertions: jsonschema-cli  # Validate that test assertion files 
 .PHONY: validate
 validate: validate/metaschema validate/versions validate/tests validate/tests/assertions ## Validate schemas against metaschema and conventions as well as test inputs and assertions
 
+# Process and upload schema artifacts
+# $(1) = file pattern (e.g., $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME))
+# $(2) = target name prefix (e.g., leap-deploy)
+define process_schema_artifact
+	@for schema_version in $(1); do \
+		latest_release=$${LATEST_RELEASE:-dry-run-release-placeholder}; \
+		if [ -f "$$schema_version" ]; then \
+			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
+			target_name="$(2).$$version.schema.json"; \
+			target_path="$(ARTIFACTS_OUTPUT)/$$target_name"; \
+			echo "  Preparing $$schema_version as $$target_name"; \
+			cp "$$schema_version" "$$target_path"; \
+			$(JSONSCHEMA_BINARY) fmt "$$target_path"; \
+			if [ "$$CI" = "true" ]; then \
+				echo "  Uploading $$target_path"; \
+				gh release upload $${latest_release} "$$target_path"; \
+			else \
+				echo "    [DRY RUN] gh release upload $${latest_release} \"$$target_path\""; \
+			fi; \
+		fi; \
+	done
+endef
+
 .PHONY: upload-artifacts
-upload-artifacts:  ## Upload schema artifacts to GitHub release
+upload-artifacts: jsonschema-cli  ## Upload schema artifacts to GitHub release
 	@if [ "$$CI" = "true" ]; then \
 		if [ -z "$$LATEST_RELEASE" ]; then \
 			echo "❌ ERROR: LATEST_RELEASE environment variable is not set"; \
@@ -296,38 +319,8 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 	fi
 	@mkdir -p $(ARTIFACTS_OUTPUT)
 	@echo "Uploading artifacts to release $${LATEST_RELEASE}..."
-	@for schema_version in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
-		latest_release=$${LATEST_RELEASE:-dry-run-release-placeholder}; \
-		if [ -f "$$schema_version" ]; then \
-			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
-			target_name="leap-deploy.$$version.schema.json"; \
-			target_path="$(ARTIFACTS_OUTPUT)/$$target_name"; \
-			echo "  Preparing $$schema_version as $$target_name"; \
-			cp "$$schema_version" "$$target_path"; \
-			if [ "$$CI" = "true" ]; then \
-				echo "  Uploading $$target_path"; \
-				gh release upload $${latest_release} "$$target_path"; \
-			else \
-				echo "    [DRY RUN] gh release upload $${latest_release} \"$$target_path\""; \
-			fi; \
-		fi; \
-	done
-	@for schema_version in $(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
-		latest_release=$${LATEST_RELEASE:-dry-run-release-placeholder}; \
-		if [ -f "$$schema_version" ]; then \
-			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
-			target_name="leap-deploy-folded.$$version.schema.json"; \
-			target_path="$(ARTIFACTS_OUTPUT)/$$target_name"; \
-			echo "  Preparing $$schema_version as $$target_name"; \
-			cp "$$schema_version" "$$target_path"; \
-			if [ "$$CI" = "true" ]; then \
-				echo "  Uploading $$target_path"; \
-				gh release upload $${latest_release} "$$target_path"; \
-			else \
-				echo "    [DRY RUN] gh release upload $${latest_release} \"$$target_path\""; \
-			fi; \
-		fi; \
-	done
+	$(call process_schema_artifact,$(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME),leap-deploy)
+	$(call process_schema_artifact,$(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME),leap-deploy-folded)
 	@echo "✅ All artifacts uploaded successfully!"
 
 .PHONY: test
