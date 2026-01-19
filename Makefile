@@ -17,8 +17,8 @@ FOLD_TEST_ENVIRONMENTS := dev staging prod
 FOLD_TEST_REGIONS := na eu
 FOLD_TEST_OUTPUT := $(OUT_DIR)/folded
 
-JSONSCHEMA_VERSION := 14.0.4
-JSONSCHEMA_BINARY := jsonschema
+JSONSCHEMA_VERSION := 14.1.0
+JSONSCHEMA_BINARY := npx -- @sourcemeta/jsonschema@$(JSONSCHEMA_VERSION)
 
 # GitHub repository info (inferred from environment or defaults for local)
 GITHUB_REPOSITORY ?= workleap/wl-leap-deploy
@@ -30,22 +30,6 @@ all: validate lint test
 .PHONY: banner
 banner: $(BANNER)
 	@cat $(BANNER)
-
-.PHONY: install-cli
-install-cli:  ## Install the jsonschema CLI if not present
-	@if ! command -v $(JSONSCHEMA_BINARY) &> /dev/null; then \
-		echo "Installing jsonschema CLI v$(JSONSCHEMA_VERSION)..."; \
-		curl --retry 5 --location --fail-early --silent --show-error \
-			--output /tmp/jsonschema-install.sh \
-			"https://raw.githubusercontent.com/sourcemeta/jsonschema/main/install"; \
-		chmod +x /tmp/jsonschema-install.sh; \
-		/tmp/jsonschema-install.sh $(JSONSCHEMA_VERSION) $$HOME/.local; \
-		rm /tmp/jsonschema-install.sh; \
-		echo "Installed jsonschema CLI to $$HOME/.local/bin"; \
-		echo "Make sure $$HOME/.local/bin is in your PATH"; \
-	else \
-		echo "jsonschema CLI already installed: $$($(JSONSCHEMA_BINARY) --version)"; \
-	fi
 
 .PHONY: test/folding
 test/folding:  # Test folding and assert against expected outputs
