@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.workleap.com/leap-deploy/v0/schema.json",
   "title": "Leap Deploy Configuration",
   "description": "Schema for leap-deploy.yaml configuration file",
@@ -81,8 +81,8 @@
       "type": "object",
       "additionalProperties": {
         "allOf": [
-          { "$ref": "#/definitions/workloadConfigWithOverrides" },
-          { "$ref": "#/definitions/requiredRootWorkloadConfigConstraints" }
+          { "$ref": "#/$defs/workloadConfigWithOverrides" },
+          { "$ref": "#/$defs/requiredRootWorkloadConfigConstraints" }
         ]
       },
       "minProperties": 1
@@ -90,7 +90,7 @@
   },
   "required": ["id", "workloads"],
   "additionalProperties": false,
-  "definitions": {
+  "$defs": {
     "requiredRootWorkloadConfigConstraints": {
       "type": "object",
       "properties": {
@@ -100,9 +100,7 @@
     },
     "foldedWorkloadConfigConstraints": {
       "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/requiredRootWorkloadConfigConstraints" }
-      ]
+      "$ref": "#/$defs/requiredRootWorkloadConfigConstraints"
     },
     "imageConfig": {
       "type": "object",
@@ -176,8 +174,8 @@
       "description": "Resulting Workload configuration with all overrides applied for the target environment and region - includes required fields",
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/workloadConfig" },
-        { "$ref": "#/definitions/foldedWorkloadConfigConstraints" }
+        { "$ref": "#/$defs/workloadConfig" },
+        { "$ref": "#/$defs/foldedWorkloadConfigConstraints" }
       ]
     },
     "workloadConfig": {
@@ -208,7 +206,7 @@
           "default": 2
         },
         "autoscaling": {
-          "$ref": "#/definitions/autoscalingConfig"
+          "$ref": "#/$defs/autoscalingConfig"
         },
         "resources": {
           "type": "object",
@@ -232,40 +230,36 @@
           "additionalProperties": false
         },
         "image": {
-          "$ref": "#/definitions/imageConfig"
+          "$ref": "#/$defs/imageConfig"
         },
         "ingress": {
-          "$ref": "#/definitions/ingressConfig",
+          "$ref": "#/$defs/ingressConfig",
           "default": null
         }
       }
     },
     "workloadConfigWithEnvironmentOverrides": {
       "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/workloadConfig" }
-      ],
+      "$ref": "#/$defs/workloadConfig",
       "properties": {
         "environments": {
           "type": "object",
           "description": "Environment-specific overrides within a region",
           "additionalProperties": {
-            "$ref": "#/definitions/workloadConfig"
+            "$ref": "#/$defs/workloadConfig"
           }
         }
       }
     },
     "workloadConfigWithOverrides": {
       "type": "object",
-      "allOf": [
-        { "$ref": "#/definitions/workloadConfigWithEnvironmentOverrides" }
-      ],
+      "$ref": "#/$defs/workloadConfigWithEnvironmentOverrides",
       "properties": {
         "regions": {
           "type": "object",
           "description": "Region-specific overrides (na, eu, etc.)",
           "additionalProperties": {
-            "$ref": "#/definitions/workloadConfigWithEnvironmentOverrides"
+            "$ref": "#/$defs/workloadConfigWithEnvironmentOverrides"
           }
         }
       }

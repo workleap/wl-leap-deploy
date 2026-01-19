@@ -17,9 +17,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install JSON Schema CLI
-        uses: sourcemeta/jsonschema@v14.0.4
-
       - name: Lint schemas
         run: make lint
 
@@ -29,9 +26,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install JSON Schema CLI
-        uses: sourcemeta/jsonschema@v14.0.4
-      
       - name: Validate schemas
         run: make validate
 
@@ -40,9 +34,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-
-      - name: Install JSON Schema CLI
-        uses: sourcemeta/jsonschema@v14.0.4
 
       - name: Test folding of configurations
         run: make test

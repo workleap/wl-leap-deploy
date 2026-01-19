@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.workleap.com/leap-deploy/v0/leap-deploy-folded.schema.json",
   "title": "Folded Workload Configuration",
   "description": "Schema for validating folded/resolved workload configurations with all overrides applied",
@@ -91,7 +91,7 @@
       "type": "object",
       "description": "Map of workload names to their folded configurations",
       "additionalProperties": {
-        "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/definitions/foldedWorkloadConfig"
+        "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/$defs/foldedWorkloadConfig"
       }
     }
   },
