@@ -118,9 +118,6 @@
         "type": {}
       }
     },
-    "foldedWorkloadConfigConstraints": {
-      "$ref": "#/$defs/requiredRootWorkloadConfigConstraints"
-    },
     "imageConfig": {
       "type": "object",
       "properties": {
@@ -188,18 +185,6 @@
         }
       },
       "additionalProperties": false
-    },
-    "foldedWorkloadConfig": {
-      "description": "Resulting Workload configuration with all overrides applied for the target environment and region - includes required fields",
-      "type": "object",
-      "allOf": [
-        {
-          "$ref": "#/$defs/workloadConfig"
-        },
-        {
-          "$ref": "#/$defs/foldedWorkloadConfigConstraints"
-        }
-      ]
     },
     "workloadConfig": {
       "type": "object",

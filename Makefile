@@ -153,7 +153,7 @@ lint: jsonschema-cli  ## Lint schema files
 	for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
 		if [ -d "$$schema_dir" ]; then \
 			echo "Linting schemas in $$schema_dir..."; \
-			if ! $(JSONSCHEMA_BINARY) lint "$$schema_dir"*.schema.json --resolve "$$schema_dir"/$(SCHEMA_FILE_NAME) --verbose --exclude orphan_definitions; then \
+			if ! $(JSONSCHEMA_BINARY) lint "$$schema_dir"*.schema.json --resolve "$$schema_dir"/$(SCHEMA_FILE_NAME) --verbose; then \
 				has_errors=1; \
 			fi; \
 		fi; \

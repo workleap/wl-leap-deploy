@@ -92,9 +92,26 @@
       "description": "Map of workload names to their folded configurations",
       "type": "object",
       "additionalProperties": {
-        "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/$defs/foldedWorkloadConfig"
+        "$ref": "#/$defs/foldedWorkloadConfig"
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "foldedWorkloadConfigConstraints": {
+      "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/$defs/requiredRootWorkloadConfigConstraints"
+    },
+    "foldedWorkloadConfig": {
+      "description": "Resulting Workload configuration with all overrides applied for the target environment and region - includes required fields",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "https://schemas.workleap.com/leap-deploy/v0/schema.json#/$defs/workloadConfig"
+        },
+        {
+          "$ref": "#/$defs/foldedWorkloadConfigConstraints"
+        }
+      ]
+    }
+  }
 }
