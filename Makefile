@@ -273,7 +273,7 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 	@mkdir -p $(ARTIFACTS_OUTPUT)
 	@echo "Uploading artifacts to release $${LATEST_RELEASE}..."
 	@for schema_version in $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME); do \
-		latest_release=$${LATEST_RELEASE:-unset}; \
+		latest_release=$${LATEST_RELEASE:-dry-run-release-placeholder}; \
 		if [ -f "$$schema_version" ]; then \
 			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
 			target_name="leap-deploy.$$version.schema.json"; \
@@ -289,16 +289,13 @@ upload-artifacts:  ## Upload schema artifacts to GitHub release
 		fi; \
 	done
 	@for schema_version in $(SCHEMAS_DIRECTORY)/v*/$(FOLDED_SCHEMA_FILE_NAME); do \
-		latest_release=$${LATEST_RELEASE:-unset}; \
+		latest_release=$${LATEST_RELEASE:-dry-run-release-placeholder}; \
 		if [ -f "$$schema_version" ]; then \
 			version=$$(echo "$$schema_version" | cut -d'/' -f2); \
 			target_name="leap-deploy-folded.$$version.schema.json"; \
 			target_path="$(ARTIFACTS_OUTPUT)/$$target_name"; \
-			main_schema_artifact="leap-deploy.$$version.schema.json"; \
-			release_url="https://github.com/$(GITHUB_REPOSITORY)/releases/download/$${latest_release}/$$main_schema_artifact"; \
-			current_ref=$$(jq -r '.properties.workloads.additionalProperties."$$ref"' "$$schema_version" | sed 's|#.*||'); \
-			echo "  Preparing $$schema_version as $$target_name (with rewritten \$$ref)"; \
-			sed "s|$$current_ref|$$release_url|" "$$schema_version" > "$$target_path"; \
+			echo "  Preparing $$schema_version as $$target_name"; \
+			cp "$$schema_version" "$$target_path"; \
 			if [ "$$CI" = "true" ]; then \
 				echo "  Uploading $$target_path"; \
 				gh release upload $${latest_release} "$$target_path"; \
