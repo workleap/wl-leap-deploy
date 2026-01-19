@@ -99,7 +99,6 @@
       "required": ["type"]
     },
     "foldedWorkloadConfigConstraints": {
-      "type": "object",
       "$ref": "#/$defs/requiredRootWorkloadConfigConstraints"
     },
     "imageConfig": {
@@ -239,7 +238,6 @@
       }
     },
     "workloadConfigWithEnvironmentOverrides": {
-      "type": "object",
       "$ref": "#/$defs/workloadConfig",
       "properties": {
         "environments": {
@@ -252,7 +250,6 @@
       }
     },
     "workloadConfigWithOverrides": {
-      "type": "object",
       "$ref": "#/$defs/workloadConfigWithEnvironmentOverrides",
       "properties": {
         "regions": {
