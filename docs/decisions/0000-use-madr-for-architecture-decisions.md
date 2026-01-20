@@ -48,17 +48,22 @@ The presence of ADR files in `docs/decisions/` following the MADR template confi
 - Good, because it is widely adopted and well-documented
 - Good, because it supports version control workflows
 - Good, because it keeps documentation close to the code
+- Good, because it provides a lot of context to AI agents
+- Bad, because non-developers would require access and knowledge of the existence of the repository 
 
 ### Plain markdown files without a template
 
 - Good, because it requires no learning curve
 - Bad, because inconsistent formats make decisions harder to find and compare
 - Bad, because important sections might be omitted
+- Good, because it provides context to AI agents
+- Neutral, because it might not provide recognizable documentation patterns to AI agents
 
 ### Confluence
 
 - Good, because it may be more discoverable for some teams
 - Bad, because it separates documentation from code
+- Bad, because it locks the documentation to Atlassian's products
 - Bad, because it is not accessible by AI agents without MCP servers and more complex setups
 
 ### No formal documentation
@@ -66,6 +71,7 @@ The presence of ADR files in `docs/decisions/` following the MADR template confi
 - Good, because it requires no effort
 - Bad, because knowledge is lost when team members leave
 - Bad, because decisions are questioned repeatedly
+- Bad, because AI agents are more likely to propose solutions that goes against the team's past decisions
 
 ## More Information
 
