@@ -11,7 +11,7 @@ MARKDOWNLINT_BINARY := $(BIN_DIR)/node_modules/.bin/markdownlint
 ADR_FILES := $(wildcard [0-9][0-9][0-9][0-9]-*.md)
 
 $(MARKDOWNLINT_BINARY):  ## Install the markdownlint CLI if not present
-	@if ! command -v $(MARKDOWNLINT_BINARY) &> /dev/null; then \
+	@if [ ! -f $(MARKDOWNLINT_BINARY) ]; then \
 		echo "Installing markdownlint CLI v$(MARKDOWNLINT_VERSION)..."; \
 		npm install --prefix "$(BIN_DIR)" $(MARKDOWNLINT_NPM_PACKAGE)@$(MARKDOWNLINT_VERSION); \
 	else \

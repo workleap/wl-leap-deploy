@@ -22,7 +22,7 @@ For new ADRs, please use one of the following templates as a starting point:
 1. Copy a template to a new file named `NNNN-title-of-decision.md` where `NNNN` is the next sequential number
 2. Fill in the template sections
 3. Submit the ADR for review via pull request
-4. Add a row to the index table in this `README.md`
+4. Add a row to the ADR index table below in this `README.md`, following the format of the existing entry
 
 The MADR documentation is available at <https://adr.github.io/madr/> while general information about ADRs is available at <https://adr.github.io/>.
 

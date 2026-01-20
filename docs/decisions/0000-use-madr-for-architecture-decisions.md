@@ -71,7 +71,7 @@ The presence of ADR files in `docs/decisions/` following the MADR template confi
 * Good, because it requires no effort
 * Bad, because knowledge is lost when team members leave
 * Bad, because decisions are questioned repeatedly
-* Bad, because AI agents are more likely to propose solutions that goes against the team's past decisions
+* Bad, because AI agents are more likely to propose solutions that go against the team's past decisions
 
 ## More Information
 
