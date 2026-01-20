@@ -20,6 +20,9 @@ jobs:
       - name: Lint schemas
         run: make lint
 
+      - name: Lint ADRs
+        run: cd docs/decisions && make lint
+
   validate:
     runs-on: ubuntu-latest
     steps:
