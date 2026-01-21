@@ -264,6 +264,7 @@
           "$ref": "#/$defs/ingressConfig"
         },
         "projectSource": {
+          "default": null,
           "$ref": "#/$defs/projectSourceConfig"
         }
       }
