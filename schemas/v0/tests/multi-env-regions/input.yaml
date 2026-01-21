@@ -8,7 +8,7 @@ id: full-featured-application
 workloads:
   # Primary API with all options configured
   main-api:
-    type: api
+    kind: api
 
     # Image configuration
     image:
@@ -138,7 +138,7 @@ workloads:
 
   # Fully-configured worker
   background-processor:
-    type: worker
+    kind: worker
 
     image:
       registry: myregistry.azurecr.io

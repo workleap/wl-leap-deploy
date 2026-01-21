@@ -10,7 +10,7 @@ A declarative deployment configuration system for managing workloads across mult
 
 Leap Deploy provides a JSON schema-based configuration format that allows you to define deployment specifications for your applications in a structured, validated way. The schema supports:
 
-- Multiple workload types (APIs, workers)
+- Multiple workload kinds (APIs, workers)
 - Environment-specific overrides
 - Region-specific configurations
 - Resource management (CPU, memory)
@@ -33,7 +33,7 @@ Add a `$schema` property at the top of your `leap-deploy.json`:
   "id": "my-application",
   "workloads": {
     "api-service": {
-      "type": "api",
+      "kind": "api",
       "replicas": 3,
       "image": {
         "registry": "myregistry.azurecr.io",
@@ -60,7 +60,7 @@ version: "1.0.0"
 id: my-application
 workloads:
   api-service:
-    type: api
+    kind: api
     replicas: 3
     image:
       registry: myregistry.azurecr.io
@@ -115,7 +115,7 @@ Each workload supports:
 
 ```yaml
 workload-name:
-  type: api | worker                    # Required: workload type
+  kind: api | worker                    # Required: workload kind
   replicas: 3                            # Number of replicas
   annotations: {}                        # Kubernetes annotations
   labels: {}                             # Kubernetes labels

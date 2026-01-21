@@ -8,7 +8,7 @@
       "id": "my-simple-application",
       "workloads": {
         "api": {
-          "type": "api",
+          "kind": "api",
           "replicas": 3,
           "image": {
             "repository": "my-app",
@@ -30,7 +30,7 @@
       "id": "multi-region-overrides-example",
       "workloads": {
         "api": {
-          "type": "api",
+          "kind": "api",
           "replicas": 2,
           "image": {
             "repository": "my-api"
@@ -55,7 +55,7 @@
           }
         },
         "worker": {
-          "type": "worker",
+          "kind": "worker",
           "replicas": 1,
           "image": {
             "repository": "my-worker"
@@ -113,9 +113,9 @@
   "$defs": {
     "requiredRootWorkloadConfigConstraints": {
       "type": "object",
-      "required": [ "type" ],
+      "required": [ "kind" ],
       "properties": {
-        "type": {}
+        "kind": {}
       }
     },
     "imageConfig": {
@@ -189,8 +189,8 @@
     "workloadConfig": {
       "type": "object",
       "properties": {
-        "type": {
-          "description": "Workload type - either 'api' for API services or 'worker' for background workers",
+        "kind": {
+          "description": "Workload kind - either 'api' for API services or 'worker' for background workers",
           "enum": [ "api", "worker" ]
         },
         "annotations": {

@@ -100,7 +100,7 @@ The `folded-config` output provides a complete configuration for each workload:
   "id": "my-app",
   "workloads": {
     "api": {
-      "type": "api",
+      "kind": "api",
       "replicas": 3,
       "image": {
         "registry": "myregistry.azurecr.io",

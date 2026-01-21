@@ -1,7 +1,7 @@
 id: full-featured-application
 workloads:
   background-processor:
-    type: worker
+    kind: worker
     image:
       registry: myregistry.azurecr.io
       repository: myorg/background-processor
@@ -27,7 +27,7 @@ workloads:
       apps.workleap.com/flavor: worker
       prometheus.io/scrape: "true"
   main-api:
-    type: api
+    kind: api
     image:
       registry: myregistry.azurecr.io
       repository: myorg/main-api

@@ -7,8 +7,8 @@
     {
       "id": "my-application",
       "workloads": {
-        "api": {
-          "type": "api",
+        "my-api": {
+          "kind": "api",
           "replicas": 5,
           "image": {
             "repository": "my-app",
@@ -25,18 +25,8 @@
       "version": "0",
       "id": "foobar",
       "workloads": {
-        "workleap-minimal-service": {
-          "type": "api",
-          "annotations": {
-            "apps.workleap.com/flavor": "service"
-          },
-          "image": {
-            "repository": "minimal-service"
-          },
-          "replicas": 4
-        },
         "workleap-sample-api": {
-          "type": "api",
+          "kind": "api",
           "image": {
             "repository": "wl-mono-repo"
           },
@@ -58,7 +48,7 @@
           }
         },
         "workleap-sample-worker": {
-          "type": "worker",
+          "kind": "worker",
           "annotations": {
             "apps.workleap.com/flavor": "worker"
           },

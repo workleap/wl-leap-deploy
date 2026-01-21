@@ -7,7 +7,7 @@ id: multi-env-service
 
 workloads:
   api-gateway:
-    type: api
+    kind: api
 
     image:
       repository: api-gateway
