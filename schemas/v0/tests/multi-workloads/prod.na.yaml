@@ -4,6 +4,9 @@ workloads:
     kind: api
     image:
       repository: order-service
+    projectSource:
+      type: csproj
+      path: /root/src/Orders.Api/Orders.Api.csproj
     replicas: 3
     ingress:
       pathPrefix: /orders
@@ -20,6 +23,9 @@ workloads:
     kind: worker
     image:
       repository: order-service
+    projectSource:
+      type: dockerfile
+      path: /root/src/Orders.Worker/Dockerfile
     replicas: 2
     resources:
       requests:

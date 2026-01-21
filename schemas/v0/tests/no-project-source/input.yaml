@@ -1,0 +1,28 @@
+# No Project Source Example
+# =========================
+# Demonstrates a workload configuration without projectSource field.
+# The folded output should explicitly set projectSource to null.
+
+id: no-source-service
+
+workloads:
+  web-app:
+    kind: api
+
+    image:
+      repository: web-app
+
+    ingress:
+      pathPrefix: /app
+
+    replicas: 2
+
+    environments:
+      dev:
+        replicas: 1
+
+      staging:
+        replicas: 2
+
+      prod:
+        replicas: 3

@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := all
 SHELL := /bin/bash
 .SHELLFLAGS := -euo pipefail -c
-	
+
 OUT_DIR := out
 BIN_DIR := bin
 
@@ -47,7 +47,7 @@ $(JSONSCHEMA_BINARY):  ## Install the jsonschema CLI if not present
 test/folding: $(JSONSCHEMA_BINARY)  # Test folding and assert against expected outputs
 	@mkdir -p $(FOLD_TEST_OUTPUT)
 	@echo "Testing folding inputs against assertion files..."
-	@has_errors=0; \
+	has_errors=0; \
 	for input_file in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*/input.yaml; do \
 		if [ -f "$$input_file" ]; then \
 			test_dir=$$(dirname "$$input_file"); \
@@ -63,7 +63,7 @@ test/folding: $(JSONSCHEMA_BINARY)  # Test folding and assert against expected o
 				fi; \
 				echo "Testing $$test_name for env=$$env (no region)..."; \
 				temp_file="$(FOLD_TEST_OUTPUT)/$$test_name-$$env.json"; \
-				$(FOLD_SCRIPT) "$$input_file" "$$env" "" false | jq . > "$$temp_file"; \
+				LEAP_DEPLOY_BASE_DIR="/root" $(FOLD_SCRIPT) "$$input_file" "$$env" "" false | jq . > "$$temp_file"; \
 				folded_yaml=$$(cat "$$temp_file" | yq -P); \
 				assertion_content=$$(cat "$$assertion_file"); \
 				if [ "$$folded_yaml" != "$$assertion_content" ]; then \
@@ -91,7 +91,7 @@ test/folding: $(JSONSCHEMA_BINARY)  # Test folding and assert against expected o
 					fi; \
 					echo "Testing $$test_name for env=$$env region=$$region..."; \
 					temp_file="$(FOLD_TEST_OUTPUT)/$$test_name-$$env-$$region.json"; \
-					$(FOLD_SCRIPT) "$$input_file" "$$env" "$$region" false | jq . > "$$temp_file"; \
+					LEAP_DEPLOY_BASE_DIR="/root" $(FOLD_SCRIPT) "$$input_file" "$$env" "$$region" false | jq . > "$$temp_file"; \
 					folded_yaml=$$(cat "$$temp_file" | yq -P); \
 					assertion_content=$$(cat "$$assertion_file"); \
 					if [ "$$folded_yaml" != "$$assertion_content" ]; then \

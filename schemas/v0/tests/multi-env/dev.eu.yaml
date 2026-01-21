@@ -4,6 +4,9 @@ workloads:
     kind: api
     image:
       repository: api-gateway
+    projectSource:
+      type: auto
+      path: /root/src/ApiGateway/ApiGateway.csproj
     ingress:
       pathPrefix: /gateway
     replicas: 1

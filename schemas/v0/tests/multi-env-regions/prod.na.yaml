@@ -6,6 +6,9 @@ workloads:
       registry: myregistry.azurecr.io
       repository: myorg/background-processor
       tag: v2.5.0
+    projectSource:
+      type: dockerfile
+      path: /root/src/BackgroundProcessor/Dockerfile
     replicas: 6
     resources:
       requests:
@@ -32,6 +35,9 @@ workloads:
       registry: myregistry.azurecr.io
       repository: myorg/main-api
       tag: v2.5.0
+    projectSource:
+      type: csproj
+      path: /root/src/MainApi/MainApi.csproj
     replicas: 10
     ingress:
       pathPrefix: /api/v2
