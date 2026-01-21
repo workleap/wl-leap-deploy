@@ -16,8 +16,6 @@ For new ADRs, please use one of the following templates as a starting point:
 
 * [adr-template.md](adr-template.md) has all sections, with explanations about them.
 * [adr-template-minimal.md](adr-template-minimal.md) only contains mandatory sections, with explanations about them.
-* [adr-template-bare.md](adr-template-bare.md) has all sections, which are empty (no explanations).
-* [adr-template-bare-minimal.md](adr-template-bare-minimal.md) has the mandatory sections, without explanations.
 
 1. Copy a template to a new file named `NNNN-title-of-decision.md` where `NNNN` is the next sequential number
 2. Fill in the template sections

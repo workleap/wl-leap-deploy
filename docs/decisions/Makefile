@@ -25,6 +25,16 @@ lint: $(MARKDOWNLINT_BINARY)  ## Lint ADR markdown files
 	@echo ""
 	@echo "✅ All ADR files linted successfully!"
 
+validate: $(ADR_FILES) ## Validate ADR structure
+	@echo "Validating ADR structure..."
+	@for f in $^; do \
+		adr_header=$$(head -3 "$$f"); \
+        echo "$$adr_header" | yq .status - | grep -E -q '^(proposed|accepted|rejected|deprecated|superseded by .*)$$' || { echo "Invalid status in $$f"; exit 1; }; \
+        echo "$$adr_header" | yq .date - | grep -E -q '^[0-9]{4}-[0-9]{2}-[0-9]{2}$$' || { echo "Invalid date in $$f"; exit 1; }; \
+    done
+	@echo ""
+	@echo "✅ All ADR files have valid structure!"
+
 .PHONY: help
 help:  ## Display this help message
 	@echo "Available targets:"

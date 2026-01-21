@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-01-19
 ---
 
@@ -41,7 +41,7 @@ The presence of ADR files in `docs/decisions/` following the MADR template confi
 ## Pros and Cons of the Options
 
 ### MADR 4.0.0
-
+wha
 [MADR 4.0.0](https://adr.github.io/madr/) is a lean template for recording architecture decisions in markdown.
 
 * Good, because it is lightweight and easy to use
