@@ -1,5 +1,5 @@
 if ($IsWindows) {
-	wsl -- make "$@"
+	wsl -- make $args
 } else {
-	make "$@"
+	make $args
 }
