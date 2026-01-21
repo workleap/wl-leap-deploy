@@ -8,7 +8,7 @@ id: order-processing-system
 workloads:
   # Public-facing API that receives orders
   orders-api:
-    type: api
+    kind: api
 
     image:
       repository: order-service
@@ -31,7 +31,7 @@ workloads:
 
   # Background worker that processes orders asynchronously
   orders-worker:
-    type: worker
+    kind: worker
 
     image:
       repository: order-service

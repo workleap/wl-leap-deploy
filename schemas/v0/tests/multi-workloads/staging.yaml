@@ -1,7 +1,7 @@
 id: order-processing-system
 workloads:
   orders-api:
-    type: api
+    kind: api
     image:
       repository: order-service
     replicas: 3
@@ -17,7 +17,7 @@ workloads:
         minReplicas: 3
         maxReplicas: 10
   orders-worker:
-    type: worker
+    kind: worker
     image:
       repository: order-service
     replicas: 2

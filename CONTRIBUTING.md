@@ -99,7 +99,7 @@ version: "1.0.0"  # or "1.0" or "1"
 id: my-deployment
 workloads:
   api-service:
-    type: api
+    kind: api
     # ...
 ```
 
