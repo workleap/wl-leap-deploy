@@ -53,7 +53,7 @@ jobs:
     outputs:
       folded-config: ${{ steps.fold.outputs.folded-config }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Fold configuration for production
         id: fold
