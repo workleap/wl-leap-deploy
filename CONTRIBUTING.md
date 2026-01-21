@@ -159,7 +159,7 @@ Releases are automated via CI/CD when PRs are merged to `main`:
 - yq
 
    ```bash
-   snap install yq
+   sudo snap install yq
    ```
 
 On Windows, using WSL is recommended.
