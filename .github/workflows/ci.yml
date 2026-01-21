@@ -24,7 +24,7 @@ jobs:
         with:
           filters: |
             adrs:
-              - '.docs/decisions/**'
+              - './docs/decisions/**'
 
   lint:
     runs-on: ubuntu-latest
