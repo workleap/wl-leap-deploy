@@ -47,7 +47,7 @@ $(JSONSCHEMA_BINARY):  ## Install the jsonschema CLI if not present
 test/folding: $(JSONSCHEMA_BINARY)  # Test folding and assert against expected outputs
 	@mkdir -p $(FOLD_TEST_OUTPUT)
 	@echo "Testing folding inputs against assertion files..."
-	has_errors=0; \
+	@has_errors=0; \
 	for input_file in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*/input.yaml; do \
 		if [ -f "$$input_file" ]; then \
 			test_dir=$$(dirname "$$input_file"); \
