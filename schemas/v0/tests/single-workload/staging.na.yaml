@@ -5,5 +5,4 @@ workloads:
     image:
       repository: my-service
     projectSource:
-      type: auto
       path: /root/src/MyService/MyService.csproj

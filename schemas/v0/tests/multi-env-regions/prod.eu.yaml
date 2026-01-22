@@ -7,7 +7,6 @@ workloads:
       repository: myorg/background-processor
       tag: v2.5.0
     projectSource:
-      type: dockerfile
       path: /root/src/BackgroundProcessor/Dockerfile
     replicas: 4
     resources:
@@ -36,7 +35,6 @@ workloads:
       repository: myorg/main-api
       tag: v2.5.0
     projectSource:
-      type: csproj
       path: /root/src/MainApi/MainApi.csproj
     replicas: 8
     ingress:

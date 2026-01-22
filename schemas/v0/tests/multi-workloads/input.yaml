@@ -14,7 +14,6 @@ workloads:
       repository: order-service
 
     projectSource:
-      type: csproj
       path: src/Orders.Api/Orders.Api.csproj
 
     replicas: 3
@@ -41,7 +40,6 @@ workloads:
       repository: order-service
 
     projectSource:
-      type: dockerfile
       path: src/Orders.Worker/Dockerfile
 
     replicas: 2

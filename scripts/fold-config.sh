@@ -138,11 +138,6 @@ while IFS= read -r WORKLOAD; do
   # Apply schema defaults and resolve paths
   CURRENT_DATA=$(echo "$CURRENT_DATA" | jq --arg fileDir "$FILE_DIR" '
     if .projectSource != null then
-      if .projectSource.type == null then
-        .projectSource = {type: "auto"} + .projectSource
-      else
-        .
-      end |
       if .projectSource.path != null and (.projectSource.path | startswith("/") | not) then
         .projectSource.path = ($fileDir + "/" + .projectSource.path)
       else

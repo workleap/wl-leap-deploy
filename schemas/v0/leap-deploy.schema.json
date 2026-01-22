@@ -125,11 +125,6 @@
       "type": [ "object", "null" ],
       "required": [ "path" ],
       "properties": {
-        "type": {
-          "description": "Type of project source file",
-          "enum": [ "auto", "csproj", "dockerfile" ],
-          "default": "auto"
-        },
         "path": {
           "description": "Path to the project source file (csproj or Dockerfile)",
           "type": "string"
