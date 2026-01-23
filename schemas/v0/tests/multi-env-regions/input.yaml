@@ -16,6 +16,10 @@ workloads:
       repository: myorg/main-api
       tag: v2.5.0
 
+    # Project source
+    buildConfig:
+      path: src/MainApi/MainApi.csproj
+
     # Base replicas
     replicas: 3
 
@@ -144,6 +148,9 @@ workloads:
       registry: myregistry.azurecr.io
       repository: myorg/background-processor
       tag: v2.5.0
+
+    buildConfig:
+      path: src/BackgroundProcessor/Dockerfile
 
     replicas: 2
 

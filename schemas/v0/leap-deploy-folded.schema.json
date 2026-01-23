@@ -14,6 +14,9 @@
             "repository": "my-app",
             "tag": "1.0.0"
           },
+          "buildConfig": {
+            "path": "src/MyApp/MyApp.csproj"
+          },
           "ingress": {
             "pathPrefix": "/api",
             "fqdn": "api.example.com"

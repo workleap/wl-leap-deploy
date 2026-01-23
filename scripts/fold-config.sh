@@ -6,6 +6,14 @@ ENVIRONMENT="$2"
 REGION="${3:-}"
 SHOW_SOURCES="${4:-false}"
 
+# Get the directory of the input file for resolving relative paths
+# Can be overridden by LEAP_DEPLOY_BASE_DIR environment variable for deterministic test paths
+if [[ -n "${LEAP_DEPLOY_BASE_DIR:-}" ]]; then
+  FILE_DIR="$LEAP_DEPLOY_BASE_DIR"
+else
+  FILE_DIR=$(dirname "$(realpath "$FILE_PATH")")
+fi
+
 # Convert YAML to JSON once
 JSON_CONFIG=$(yq eval -o=json '.' "$FILE_PATH")
 
@@ -50,7 +58,7 @@ def merge_with_metadata($current; $overlay; $source_path; $metadata):
     else
       {current: $cur, metadata: $meta}
     end;
-  
+
   deep_merge($current; $overlay; $source_path; []; $metadata);
 EOF
 
@@ -68,11 +76,11 @@ while IFS= read -r WORKLOAD; do
     echo ","
   fi
   FIRST=false
-  
+
   # Start with defaults and empty metadata
   CURRENT_DATA="$DEFAULTS"
   CURRENT_METADATA="{}"
-  
+
   # Layer 1: Merge workload-level config (excluding environments/regions)
   WORKLOAD_BASE=$(echo "$JSON_CONFIG" | jq -c ".workloads[\"$WORKLOAD\"] | del(.environments, .regions)")
   MERGE_RESULT=$(jq -n \
@@ -85,7 +93,7 @@ while IFS= read -r WORKLOAD; do
   ')
   CURRENT_DATA=$(echo "$MERGE_RESULT" | jq -c '.current')
   CURRENT_METADATA=$(echo "$MERGE_RESULT" | jq -c '.metadata')
-  
+
   # Layer 2: Merge environment-level config (cross-region)
   ENV_CONFIG=$(echo "$JSON_CONFIG" | jq -c ".workloads[\"$WORKLOAD\"].environments[\"$ENVIRONMENT\"] // {} | del(.regions)")
   MERGE_RESULT=$(jq -n \
@@ -98,7 +106,7 @@ while IFS= read -r WORKLOAD; do
   ')
   CURRENT_DATA=$(echo "$MERGE_RESULT" | jq -c '.current')
   CURRENT_METADATA=$(echo "$MERGE_RESULT" | jq -c '.metadata')
-  
+
   # Layer 3: Merge region-level config (if region specified)
   if [[ -n "$REGION" ]]; then
     REGION_CONFIG=$(echo "$JSON_CONFIG" | jq -c ".workloads[\"$WORKLOAD\"].regions[\"$REGION\"] // {} | del(.environments)")
@@ -112,7 +120,7 @@ while IFS= read -r WORKLOAD; do
     ')
     CURRENT_DATA=$(echo "$MERGE_RESULT" | jq -c '.current')
     CURRENT_METADATA=$(echo "$MERGE_RESULT" | jq -c '.metadata')
-    
+
     # Layer 4: Merge region+environment config (most specific)
     REGION_ENV_CONFIG=$(echo "$JSON_CONFIG" | jq -c ".workloads[\"$WORKLOAD\"].regions[\"$REGION\"].environments[\"$ENVIRONMENT\"] // {}")
     MERGE_RESULT=$(jq -n \
@@ -126,7 +134,26 @@ while IFS= read -r WORKLOAD; do
     CURRENT_DATA=$(echo "$MERGE_RESULT" | jq -c '.current')
     CURRENT_METADATA=$(echo "$MERGE_RESULT" | jq -c '.metadata')
   fi
-  
+
+  # Apply schema defaults and resolve paths
+  CURRENT_DATA=$(echo "$CURRENT_DATA" | jq --arg fileDir "$FILE_DIR" '
+    if .buildConfig != null then
+      if .buildConfig.path != null and (.buildConfig.path | startswith("/") | not) then
+        .buildConfig.path = ($fileDir + "/" + .buildConfig.path)
+      else
+        .
+      end
+    else
+      .buildConfig = null
+    end |
+    # Reconstruct object with correct field ordering
+    {
+      kind: .kind,
+      image: .image,
+      buildConfig: .buildConfig
+    } + (. | del(.kind, .image, .buildConfig))
+  ')
+
   # Output based on SHOW_SOURCES flag
   if [[ "$SHOW_SOURCES" == "true" ]]; then
     # Output with metadata at root level
@@ -139,7 +166,7 @@ while IFS= read -r WORKLOAD; do
     # Output just the data (no metadata)
     echo -n "  \"$WORKLOAD\": $(echo "$CURRENT_DATA" | jq -c '.')"
   fi
-  
+
 done <<< "$WORKLOADS"
 
 echo ""

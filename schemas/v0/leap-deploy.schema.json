@@ -14,6 +14,9 @@
             "repository": "my-app",
             "tag": "1.0.0"
           },
+          "buildConfig": {
+            "path": "src/MyApp/MyApp.csproj"
+          },
           "ingress": {
             "pathPrefix": "/api",
             "fqdn": "api.example.com"
@@ -117,6 +120,17 @@
       "properties": {
         "kind": {}
       }
+    },
+    "buildConfigConfig": {
+      "type": [ "object", "null" ],
+      "required": [ "path" ],
+      "properties": {
+        "path": {
+          "description": "Path to the project source file (csproj or Dockerfile)",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
     },
     "imageConfig": {
       "type": "object",
@@ -243,6 +257,10 @@
         "ingress": {
           "default": null,
           "$ref": "#/$defs/ingressConfig"
+        },
+        "buildConfig": {
+          "default": null,
+          "$ref": "#/$defs/buildConfigConfig"
         }
       }
     },

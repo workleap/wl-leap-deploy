@@ -141,3 +141,25 @@ Releases are automated via CI/CD when PRs are merged to `main`:
    - `leap-deploy.v2.json` (when v2 exists)
 5. Updates release notes with changes
 
+# Development environment setup
+
+- make
+
+   ```bash
+   sudo apt install make
+   ```
+
+- nodejs LTS
+
+   ```bash
+   curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+   sudo apt install nodejs
+   ```
+
+- yq
+
+   ```bash
+   sudo snap install yq
+   ```
+
+On Windows, using WSL is recommended.

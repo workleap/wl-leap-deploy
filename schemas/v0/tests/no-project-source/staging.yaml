@@ -1,0 +1,10 @@
+id: no-source-service
+workloads:
+  web-app:
+    kind: api
+    image:
+      repository: web-app
+    buildConfig: null
+    ingress:
+      pathPrefix: /app
+    replicas: 2

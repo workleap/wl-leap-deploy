@@ -4,6 +4,8 @@ workloads:
     kind: api
     image:
       repository: global-api-service
+    buildConfig:
+      path: /root/src/GlobalApi/GlobalApi.csproj
     ingress:
       pathPrefix: /api
     replicas: 10
