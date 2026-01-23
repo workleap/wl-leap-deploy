@@ -4,7 +4,7 @@ workloads:
     kind: api
     image:
       repository: global-api-service
-    projectSource:
+    buildConfig:
       path: /root/src/GlobalApi/GlobalApi.csproj
     ingress:
       pathPrefix: /api

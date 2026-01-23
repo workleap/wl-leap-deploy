@@ -4,7 +4,7 @@ workloads:
     kind: api
     image:
       repository: order-service
-    projectSource:
+    buildConfig:
       path: /root/src/Orders.Api/Orders.Api.csproj
     replicas: 3
     ingress:
@@ -22,7 +22,7 @@ workloads:
     kind: worker
     image:
       repository: order-service
-    projectSource:
+    buildConfig:
       path: /root/src/Orders.Worker/Dockerfile
     replicas: 2
     resources:

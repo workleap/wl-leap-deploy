@@ -137,21 +137,21 @@ while IFS= read -r WORKLOAD; do
 
   # Apply schema defaults and resolve paths
   CURRENT_DATA=$(echo "$CURRENT_DATA" | jq --arg fileDir "$FILE_DIR" '
-    if .projectSource != null then
-      if .projectSource.path != null and (.projectSource.path | startswith("/") | not) then
-        .projectSource.path = ($fileDir + "/" + .projectSource.path)
+    if .buildConfig != null then
+      if .buildConfig.path != null and (.buildConfig.path | startswith("/") | not) then
+        .buildConfig.path = ($fileDir + "/" + .buildConfig.path)
       else
         .
       end
     else
-      .projectSource = null
+      .buildConfig = null
     end |
     # Reconstruct object with correct field ordering
     {
       kind: .kind,
       image: .image,
-      projectSource: .projectSource
-    } + (. | del(.kind, .image, .projectSource))
+      buildConfig: .buildConfig
+    } + (. | del(.kind, .image, .buildConfig))
   ')
 
   # Output based on SHOW_SOURCES flag

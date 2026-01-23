@@ -1,7 +1,7 @@
 # No Project Source Example
 # =========================
-# Demonstrates a workload configuration without projectSource field.
-# The folded output should explicitly set projectSource to null.
+# Demonstrates a workload configuration without buildConfig field.
+# The folded output should explicitly set buildConfig to null.
 
 id: no-source-service
 

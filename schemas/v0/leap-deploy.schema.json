@@ -14,7 +14,7 @@
             "repository": "my-app",
             "tag": "1.0.0"
           },
-          "projectSource": {
+          "buildConfig": {
             "path": "src/MyApp/MyApp.csproj"
           },
           "ingress": {
@@ -121,7 +121,7 @@
         "kind": {}
       }
     },
-    "projectSourceConfig": {
+    "buildConfigConfig": {
       "type": [ "object", "null" ],
       "required": [ "path" ],
       "properties": {
@@ -258,9 +258,9 @@
           "default": null,
           "$ref": "#/$defs/ingressConfig"
         },
-        "projectSource": {
+        "buildConfig": {
           "default": null,
-          "$ref": "#/$defs/projectSourceConfig"
+          "$ref": "#/$defs/buildConfigConfig"
         }
       }
     },

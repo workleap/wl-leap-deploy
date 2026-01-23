@@ -4,5 +4,5 @@ workloads:
     kind: api
     image:
       repository: my-service
-    projectSource:
+    buildConfig:
       path: /root/src/MyService/MyService.csproj

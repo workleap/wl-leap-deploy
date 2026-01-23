@@ -13,7 +13,7 @@ workloads:
     image:
       repository: order-service
 
-    projectSource:
+    buildConfig:
       path: src/Orders.Api/Orders.Api.csproj
 
     replicas: 3
@@ -39,7 +39,7 @@ workloads:
     image:
       repository: order-service
 
-    projectSource:
+    buildConfig:
       path: src/Orders.Worker/Dockerfile
 
     replicas: 2

@@ -4,7 +4,7 @@ workloads:
     kind: api
     image:
       repository: api-gateway
-    projectSource:
+    buildConfig:
       path: /root/src/ApiGateway/ApiGateway.csproj
     ingress:
       pathPrefix: /gateway

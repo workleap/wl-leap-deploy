@@ -17,7 +17,7 @@ workloads:
       tag: v2.5.0
 
     # Project source
-    projectSource:
+    buildConfig:
       path: src/MainApi/MainApi.csproj
 
     # Base replicas
@@ -149,7 +149,7 @@ workloads:
       repository: myorg/background-processor
       tag: v2.5.0
 
-    projectSource:
+    buildConfig:
       path: src/BackgroundProcessor/Dockerfile
 
     replicas: 2

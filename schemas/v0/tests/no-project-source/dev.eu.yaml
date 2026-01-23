@@ -4,7 +4,7 @@ workloads:
     kind: api
     image:
       repository: web-app
-    projectSource: null
+    buildConfig: null
     ingress:
       pathPrefix: /app
     replicas: 1

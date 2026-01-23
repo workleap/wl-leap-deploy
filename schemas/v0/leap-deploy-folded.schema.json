@@ -14,7 +14,7 @@
             "repository": "my-app",
             "tag": "1.0.0"
           },
-          "projectSource": {
+          "buildConfig": {
             "path": "src/MyApp/MyApp.csproj"
           },
           "ingress": {

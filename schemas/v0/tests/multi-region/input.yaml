@@ -13,7 +13,7 @@ workloads:
     image:
       repository: global-api-service
 
-    projectSource:
+    buildConfig:
       path: src/GlobalApi/GlobalApi.csproj
 
     ingress:
