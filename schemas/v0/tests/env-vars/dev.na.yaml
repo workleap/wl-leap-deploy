@@ -1,0 +1,15 @@
+id: env-vars-test
+workloads:
+  api:
+    kind: api
+    image:
+      repository: env-vars-api
+    buildConfig:
+      path: /root/src/EnvVarsApi/EnvVarsApi.csproj
+    envVars:
+      LOG_LEVEL: debug
+      APP_NAME: my-api
+      DATABASE_POOL_SIZE: "10"
+      DEBUG_MODE: "true"
+      REGION: north-america
+      CDN_URL: https://cdn-na.example.com

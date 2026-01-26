@@ -1,0 +1,17 @@
+id: env-vars-test
+workloads:
+  api:
+    kind: api
+    image:
+      repository: env-vars-api
+    buildConfig:
+      path: /root/src/EnvVarsApi/EnvVarsApi.csproj
+    envVars:
+      LOG_LEVEL: info
+      APP_NAME: my-api
+      DATABASE_POOL_SIZE: "10"
+      ENABLE_METRICS: "true"
+      REGION: europe
+      CDN_URL: https://cdn-eu.example.com
+      GDPR_MODE: "true"
+      GDPR_TEST_MODE: "true"

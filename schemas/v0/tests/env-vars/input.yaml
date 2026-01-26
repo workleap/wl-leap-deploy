@@ -1,0 +1,59 @@
+id: env-vars-test
+
+workloads:
+  api:
+    kind: api
+    image:
+      repository: env-vars-api
+    buildConfig:
+      path: src/EnvVarsApi/EnvVarsApi.csproj
+
+    # Base envVars - applied to all environments/regions
+    envVars:
+      LOG_LEVEL: info
+      APP_NAME: my-api
+      DATABASE_POOL_SIZE: "10"
+
+    # Environment-specific overrides
+    environments:
+      dev:
+        envVars:
+          LOG_LEVEL: debug
+          DEBUG_MODE: "true"
+
+      staging:
+        envVars:
+          LOG_LEVEL: info
+          ENABLE_METRICS: "true"
+
+      prod:
+        envVars:
+          LOG_LEVEL: warn
+          ENABLE_METRICS: "true"
+          DATABASE_POOL_SIZE: "50"
+
+    # Region-specific configurations
+    regions:
+      na:
+        envVars:
+          REGION: north-america
+          CDN_URL: https://cdn-na.example.com
+        environments:
+          prod:
+            envVars:
+              DATABASE_POOL_SIZE: "100"
+              CACHE_TTL: "3600"
+
+      eu:
+        envVars:
+          REGION: europe
+          CDN_URL: https://cdn-eu.example.com
+          GDPR_MODE: "true"
+        environments:
+          staging:
+            envVars:
+              GDPR_TEST_MODE: "true"
+          prod:
+            envVars:
+              DATABASE_POOL_SIZE: "75"
+              GDPR_STRICT: "true"
