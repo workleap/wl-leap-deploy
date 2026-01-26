@@ -261,6 +261,13 @@
         "buildConfig": {
           "default": null,
           "$ref": "#/$defs/buildConfigConfig"
+        },
+        "envVars": {
+          "description": "Environment variables as key-value pairs",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       }
     },
