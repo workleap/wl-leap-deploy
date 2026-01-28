@@ -1,0 +1,110 @@
+{
+  "target": "https://schemas.workleap.com/leap-deploy/v0/leap-deploy-folded.schema.json",
+  "tests": [
+    {
+      "description": "single-workload dev is valid",
+      "valid": true,
+      "dataPath": "../tests/single-workload/dev.yaml"
+    },
+    {
+      "description": "single-workload staging is valid",
+      "valid": true,
+      "dataPath": "../tests/single-workload/staging.yaml"
+    },
+    {
+      "description": "single-workload prod is valid",
+      "valid": true,
+      "dataPath": "../tests/single-workload/prod.yaml"
+    },
+    {
+      "description": "multi-env dev is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-env/dev.yaml"
+    },
+    {
+      "description": "multi-env staging is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-env/staging.yaml"
+    },
+    {
+      "description": "multi-env prod is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-env/prod.yaml"
+    },
+    {
+      "description": "multi-region dev is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-region/dev.yaml"
+    },
+    {
+      "description": "multi-region staging is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-region/staging.yaml"
+    },
+    {
+      "description": "multi-region prod is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-region/prod.yaml"
+    },
+    {
+      "description": "multi-workloads dev is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-workloads/dev.yaml"
+    },
+    {
+      "description": "multi-workloads staging is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-workloads/staging.yaml"
+    },
+    {
+      "description": "multi-workloads prod is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-workloads/prod.yaml"
+    },
+    {
+      "description": "multi-env-regions dev is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-env-regions/dev.yaml"
+    },
+    {
+      "description": "multi-env-regions staging is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-env-regions/staging.yaml"
+    },
+    {
+      "description": "multi-env-regions prod is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-env-regions/prod.yaml"
+    },
+    {
+      "description": "no-project-source dev is valid",
+      "valid": true,
+      "dataPath": "../tests/no-project-source/dev.yaml"
+    },
+    {
+      "description": "no-project-source staging is valid",
+      "valid": true,
+      "dataPath": "../tests/no-project-source/staging.yaml"
+    },
+    {
+      "description": "no-project-source prod is valid",
+      "valid": true,
+      "dataPath": "../tests/no-project-source/prod.yaml"
+    },
+    {
+      "description": "env-vars dev is valid",
+      "valid": true,
+      "dataPath": "../tests/env-vars/dev.yaml"
+    },
+    {
+      "description": "env-vars staging is valid",
+      "valid": true,
+      "dataPath": "../tests/env-vars/staging.yaml"
+    },
+    {
+      "description": "env-vars prod is valid",
+      "valid": true,
+      "dataPath": "../tests/env-vars/prod.yaml"
+    }
+  ]
+}

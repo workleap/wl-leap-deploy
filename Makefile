@@ -43,8 +43,37 @@ $(JSONSCHEMA_BINARY):  ## Install the jsonschema CLI if not present
 		echo "jsonschema CLI already installed: $$($(JSONSCHEMA_BINARY) --version)"; \
 	fi
 
+.PHONY: test/schema
+test/schema: $(JSONSCHEMA_BINARY)  ## Run schema unit tests (valid and invalid inputs)
+	@echo "Running schema unit tests..."
+	@has_errors=0; \
+	for schema_dir in $(SCHEMAS_DIRECTORY)/v*/; do \
+		if [ -d "$$schema_dir/schema-tests" ]; then \
+			echo "Testing schemas in $$schema_dir..."; \
+			for test_file in "$$schema_dir/schema-tests"/*.test.json; do \
+				if [ -f "$$test_file" ]; then \
+					echo "Running $$test_file..."; \
+					if ! $(JSONSCHEMA_BINARY) test "$$test_file" \
+						--resolve "$$schema_dir/$(SCHEMA_FILE_NAME)" \
+						--resolve "$$schema_dir/$(FOLDED_SCHEMA_FILE_NAME)" \
+						--verbose; then \
+						has_errors=1; \
+					fi; \
+				fi; \
+			done; \
+		fi; \
+	done; \
+	if [ $$has_errors -eq 1 ]; then \
+		echo ""; \
+		echo "❌ Schema tests failed"; \
+		exit 1; \
+	else \
+		echo ""; \
+		echo "✅ All schema tests passed!"; \
+	fi
+
 .PHONY: test/folding
-test/folding: $(JSONSCHEMA_BINARY)  # Test folding and assert against expected outputs
+test/folding: $(JSONSCHEMA_BINARY)  ## Test folding and assert against expected outputs
 	@mkdir -p $(FOLD_TEST_OUTPUT)
 	@echo "Testing folding inputs against assertion files..."
 	@has_errors=0; \
@@ -212,72 +241,8 @@ validate/versions: $(JSONSCHEMA_BINARY)  # Validate that schema version patterns
 	@echo ""
 	@echo "All schema validations passed!"
 
-.PHONY: validate/tests
-validate/tests: $(JSONSCHEMA_BINARY)  # Validate that test input files are valid against the schema
-	@echo "Validating test input files against schemas..."
-	@has_errors=0; \
-	for input_file in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*/input.yaml; do \
-		if [ -f "$$input_file" ]; then \
-			version_dir=$$(echo "$$input_file" | cut -d'/' -f2); \
-			schema_dir="$(SCHEMAS_DIRECTORY)/$$version_dir"; \
-			schema_file="$$schema_dir/$(SCHEMA_FILE_NAME)"; \
-			echo "Validating $$input_file against $$schema_file..."; \
-			temp_file="$$(mktemp)"; \
-			yq -o=json "$$input_file" > "$$temp_file"; \
-			if ! $(JSONSCHEMA_BINARY) validate "$$schema_file" "$$temp_file" \
-				--resolve "$$schema_dir" \
-				--extension .schema.json; then \
-				echo "❌ VALIDATION FAILED: $$input_file"; \
-				has_errors=1; \
-			fi; \
-			rm -f "$$temp_file"; \
-		fi; \
-	done; \
-	if [ $$has_errors -eq 1 ]; then \
-		echo ""; \
-		echo "❌ Test validation failed"; \
-		exit 1; \
-	else \
-		echo ""; \
-		echo "✅ All test inputs are valid!"; \
-	fi
-
-.PHONY: validate/tests/assertions
-validate/tests/assertions: $(JSONSCHEMA_BINARY)  # Validate that test assertion files are valid against the folded schema
-	@echo "Validating test assertion files against folded schema..."
-	@has_errors=0; \
-	for test_dir in $(SCHEMAS_DIRECTORY)/v*/$(TESTS_DIRECTORY_NAME)/*/; do \
-		if [ -d "$$test_dir" ]; then \
-			version_dir=$$(echo "$$test_dir" | cut -d'/' -f2); \
-			schema_dir="$(SCHEMAS_DIRECTORY)/$$version_dir"; \
-			schema_file="$$schema_dir/$(FOLDED_SCHEMA_FILE_NAME)"; \
-			for assertion_file in "$$test_dir"*.yaml; do \
-				if [ -f "$$assertion_file" ] && [ "$$(basename "$$assertion_file")" != "input.yaml" ]; then \
-					echo "Validating $$assertion_file against $$schema_file..."; \
-					temp_file="$$(mktemp)"; \
-					yq -o=json "$$assertion_file" > "$$temp_file"; \
-					if ! $(JSONSCHEMA_BINARY) validate "$$schema_file" "$$temp_file" \
-						--resolve "$$schema_dir" \
-						--extension .schema.json; then \
-						echo "❌ VALIDATION FAILED: $$assertion_file"; \
-						has_errors=1; \
-					fi; \
-					rm -f "$$temp_file"; \
-				fi; \
-			done; \
-		fi; \
-	done; \
-	if [ $$has_errors -eq 1 ]; then \
-		echo ""; \
-		echo "❌ Assertion validation failed"; \
-		exit 1; \
-	else \
-		echo ""; \
-		echo "✅ All test assertions are valid!"; \
-	fi
-
 .PHONY: validate
-validate: validate/metaschema validate/versions validate/tests validate/tests/assertions ## Validate schemas against metaschema and conventions as well as test inputs and assertions
+validate: validate/metaschema validate/versions  ## Validate schemas against metaschema and version conventions
 
 # Process and upload schema artifacts
 # $(1) = file pattern (e.g., $(SCHEMAS_DIRECTORY)/v*/$(SCHEMA_FILE_NAME))
@@ -323,7 +288,7 @@ upload-artifacts: $(JSONSCHEMA_BINARY)  ## Upload schema artifacts to GitHub rel
 	@echo "✅ All artifacts uploaded successfully!"
 
 .PHONY: test
-test: test/folding  ## Run all tests
+test: test/schema test/folding  ## Run all tests
 
 .PHONY: clean
 clean:
