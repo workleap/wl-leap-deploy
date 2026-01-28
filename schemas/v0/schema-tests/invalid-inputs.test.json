@@ -1,0 +1,268 @@
+{
+  "target": "https://schemas.workleap.com/leap-deploy/v0/schema.json",
+  "tests": [
+    {
+      "description": "rejects empty object",
+      "valid": false,
+      "data": {}
+    },
+    {
+      "description": "rejects missing id",
+      "valid": false,
+      "data": {
+        "workloads": {
+          "api": {
+            "kind": "api"
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects missing workloads",
+      "valid": false,
+      "data": {
+        "id": "test"
+      }
+    },
+    {
+      "description": "rejects empty workloads",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {}
+      }
+    },
+    {
+      "description": "rejects invalid workload kind",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "invalid"
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects missing workload kind",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {}
+        }
+      }
+    },
+    {
+      "description": "rejects invalid version pattern",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "version": "1.0",
+        "workloads": {
+          "api": {
+            "kind": "api"
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects invalid cpu format",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "resources": {
+              "requests": {
+                "cpu": "invalid"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects invalid memory format",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "resources": {
+              "requests": {
+                "memory": "invalid"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects zero replicas",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "replicas": 0
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects negative replicas",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "replicas": -1
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects additional root properties",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api"
+          }
+        },
+        "unknown": "field"
+      }
+    },
+    {
+      "description": "rejects additional image properties",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "image": {
+              "repository": "test",
+              "unknown": "field"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects additional ingress properties",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "ingress": {
+              "pathPrefix": "/api",
+              "unknown": "field"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects buildConfig without path",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "buildConfig": {}
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects invalid autoscaling minReplicas",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "autoscaling": {
+              "horizontal": {
+                "minReplicas": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects invalid autoscaling maxReplicas",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "autoscaling": {
+              "horizontal": {
+                "maxReplicas": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects non-string annotation values",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "annotations": {
+              "key": 123
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects non-string label values",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "labels": {
+              "key": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects non-string envVars values",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "envVars": {
+              "KEY": 123
+            }
+          }
+        }
+      }
+    }
+  ]
+}

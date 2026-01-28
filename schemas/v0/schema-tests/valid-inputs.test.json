@@ -1,0 +1,40 @@
+{
+  "target": "https://schemas.workleap.com/leap-deploy/v0/schema.json",
+  "tests": [
+    {
+      "description": "single-workload input is valid",
+      "valid": true,
+      "dataPath": "../tests/single-workload/input.yaml"
+    },
+    {
+      "description": "multi-env input is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-env/input.yaml"
+    },
+    {
+      "description": "multi-region input is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-region/input.yaml"
+    },
+    {
+      "description": "multi-workloads input is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-workloads/input.yaml"
+    },
+    {
+      "description": "multi-env-regions input is valid",
+      "valid": true,
+      "dataPath": "../tests/multi-env-regions/input.yaml"
+    },
+    {
+      "description": "no-project-source input is valid",
+      "valid": true,
+      "dataPath": "../tests/no-project-source/input.yaml"
+    },
+    {
+      "description": "env-vars input is valid",
+      "valid": true,
+      "dataPath": "../tests/env-vars/input.yaml"
+    }
+  ]
+}
