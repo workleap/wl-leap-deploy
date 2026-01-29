@@ -196,7 +196,6 @@
             },
             "scheme": {
               "description": "Scheme to use for connecting to the host (HTTP or HTTPS)",
-              "type": "string",
               "enum": ["HTTP", "HTTPS"]
             },
             "httpHeaders": {
