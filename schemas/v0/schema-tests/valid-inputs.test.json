@@ -35,6 +35,104 @@
       "description": "env-vars input is valid",
       "valid": true,
       "dataPath": "../tests/env-vars/input.yaml"
+    },
+    {
+      "description": "accepts ingress with annotations",
+      "valid": true,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "ingress": {
+              "pathPrefix": "/api",
+              "annotations": {
+                "nginx.ingress.kubernetes.io/rewrite-target": "/",
+                "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "accepts readiness probe with httpGet",
+      "valid": true,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "probes": {
+              "readiness": {
+                "httpGet": {
+                  "path": "/health",
+                  "port": 8080
+                },
+                "initialDelaySeconds": 5,
+                "periodSeconds": 10
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "accepts liveness probe with exec command",
+      "valid": true,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "probes": {
+              "liveness": {
+                "exec": {
+                  "command": ["/bin/sh", "-c", "cat /tmp/healthy"]
+                },
+                "initialDelaySeconds": 10,
+                "periodSeconds": 5
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "accepts startup probe with httpGet using port name",
+      "valid": true,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "probes": {
+              "startup": {
+                "httpGet": {
+                  "path": "/startup",
+                  "port": "http",
+                  "scheme": "HTTP"
+                },
+                "failureThreshold": 30,
+                "periodSeconds": 10
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "accepts null probes to disable inherited probes",
+      "valid": true,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "probes": null
+          }
+        }
+      }
     }
   ]
 }
