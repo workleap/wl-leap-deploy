@@ -5,7 +5,7 @@ workloads:
     image:
       repository: env-vars-api
     buildConfig:
-      path: /root/src/EnvVarsApi/EnvVarsApi.csproj
+      path: schemas/v0/tests/env-vars/src/EnvVarsApi/EnvVarsApi.csproj
     envVars:
       LOG_LEVEL: info
       APP_NAME: my-api

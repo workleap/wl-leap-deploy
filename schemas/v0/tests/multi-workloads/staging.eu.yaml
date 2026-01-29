@@ -5,7 +5,7 @@ workloads:
     image:
       repository: order-service
     buildConfig:
-      path: /root/src/Orders.Api/Orders.Api.csproj
+      path: schemas/v0/tests/multi-workloads/src/Orders.Api/Orders.Api.csproj
     replicas: 3
     ingress:
       pathPrefix: /orders
@@ -23,7 +23,7 @@ workloads:
     image:
       repository: order-service
     buildConfig:
-      path: /root/src/Orders.Worker/Dockerfile
+      path: schemas/v0/tests/multi-workloads/src/Orders.Worker/Dockerfile
     replicas: 2
     resources:
       requests:

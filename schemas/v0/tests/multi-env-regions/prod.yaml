@@ -7,7 +7,7 @@ workloads:
       repository: myorg/background-processor
       tag: v2.5.0
     buildConfig:
-      path: /root/src/BackgroundProcessor/Dockerfile
+      path: schemas/v0/tests/multi-env-regions/src/BackgroundProcessor/Dockerfile
     replicas: 4
     resources:
       requests:
@@ -35,7 +35,7 @@ workloads:
       repository: myorg/main-api
       tag: v2.5.0
     buildConfig:
-      path: /root/src/MainApi/MainApi.csproj
+      path: schemas/v0/tests/multi-env-regions/src/MainApi/MainApi.csproj
     replicas: 5
     ingress:
       pathPrefix: /api/v2
