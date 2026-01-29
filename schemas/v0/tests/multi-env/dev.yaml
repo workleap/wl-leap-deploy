@@ -5,7 +5,7 @@ workloads:
     image:
       repository: api-gateway
     buildConfig:
-      path: /root/src/ApiGateway/ApiGateway.csproj
+      path: schemas/v0/tests/multi-env/src/ApiGateway/ApiGateway.csproj
     ingress:
       pathPrefix: /gateway
     replicas: 1

@@ -6,13 +6,9 @@ ENVIRONMENT="$2"
 REGION="${3:-}"
 SHOW_SOURCES="${4:-false}"
 
-# Get the directory of the input file for resolving relative paths
-# Can be overridden by LEAP_DEPLOY_BASE_DIR environment variable for deterministic test paths
-if [[ -n "${LEAP_DEPLOY_BASE_DIR:-}" ]]; then
-  FILE_DIR="$LEAP_DEPLOY_BASE_DIR"
-else
-  FILE_DIR=$(dirname "$(realpath "$FILE_PATH")")
-fi
+# Get the directory of the input file relative to the repository root for resolving relative paths
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+FILE_DIR=$(realpath --relative-to="$REPO_ROOT" "$(dirname "$(realpath "$FILE_PATH")")")
 
 # Convert YAML to JSON once
 JSON_CONFIG=$(yq eval -o=json '.' "$FILE_PATH")

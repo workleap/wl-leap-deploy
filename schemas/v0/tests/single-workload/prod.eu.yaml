@@ -5,4 +5,4 @@ workloads:
     image:
       repository: my-service
     buildConfig:
-      path: /root/src/MyService/MyService.csproj
+      path: schemas/v0/tests/single-workload/src/MyService/MyService.csproj
