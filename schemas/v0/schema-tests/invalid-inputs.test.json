@@ -263,6 +263,102 @@
           }
         }
       }
+    },
+    {
+      "description": "rejects non-string ingress annotation values",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "ingress": {
+              "pathPrefix": "/api",
+              "annotations": {
+                "nginx.ingress.kubernetes.io/proxy-body-size": 1024
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects probe with both httpGet and exec",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "probes": {
+              "readiness": {
+                "httpGet": {
+                  "path": "/health",
+                  "port": 8080
+                },
+                "exec": {
+                  "command": ["/bin/sh", "-c", "exit 0"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects httpGet probe without port",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "probes": {
+              "readiness": {
+                "httpGet": {
+                  "path": "/health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects exec probe without command",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "probes": {
+              "liveness": {
+                "exec": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "rejects exec probe with empty command array",
+      "valid": false,
+      "data": {
+        "id": "test",
+        "workloads": {
+          "api": {
+            "kind": "api",
+            "probes": {
+              "liveness": {
+                "exec": {
+                  "command": []
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }

@@ -178,6 +178,7 @@
         "httpGet": {
           "type": "object",
           "description": "HTTP GET probe configuration",
+          "required": ["port"],
           "properties": {
             "path": {
               "description": "Path to access on the HTTP server",
@@ -223,10 +224,12 @@
         "exec": {
           "type": "object",
           "description": "Exec probe configuration",
+          "required": ["command"],
           "properties": {
             "command": {
               "description": "Command to execute in the container",
               "type": "array",
+              "minItems": 1,
               "items": { "type": "string" }
             }
           },
@@ -282,7 +285,7 @@
       "additionalProperties": false
     },
     "probesConfig": {
-      "type": "object",
+      "type": ["object", "null"],
       "description": "Health probes configuration",
       "properties": {
         "readiness": {
@@ -392,6 +395,7 @@
           "$ref": "#/$defs/ingressConfig"
         },
         "probes": {
+          "default": null,
           "$ref": "#/$defs/probesConfig"
         },
         "buildConfig": {
