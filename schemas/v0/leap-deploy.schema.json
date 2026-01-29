@@ -173,7 +173,7 @@
     },
     "probeConfig": {
       "type": "object",
-      "description": "Health probe configuration (matches Kubernetes Probe spec)",
+      "description": "Health probe configuration (matches Kubernetes Probe spec) - if set, exactly one of httpGet or exec must be specified",
       "properties": {
         "httpGet": {
           "type": "object",
@@ -263,6 +263,22 @@
           "minimum": 0
         }
       },
+      "oneOf": [
+        {
+          "required": ["httpGet"],
+          "properties": {
+            "httpGet": true,
+            "exec": false
+          }
+        },
+        {
+          "required": ["exec"],
+          "properties": {
+            "exec": true,
+            "httpGet": false
+          }
+        }
+      ],
       "additionalProperties": false
     },
     "probesConfig": {
