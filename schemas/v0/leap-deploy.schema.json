@@ -160,6 +160,124 @@
         "fqdn": {
           "description": "Fully qualified domain name",
           "type": "string"
+        },
+        "annotations": {
+          "description": "Additional annotations for the Ingress resource",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "probeConfig": {
+      "type": "object",
+      "description": "Health probe configuration (matches Kubernetes Probe spec)",
+      "properties": {
+        "httpGet": {
+          "type": "object",
+          "description": "HTTP GET probe configuration",
+          "properties": {
+            "path": {
+              "description": "Path to access on the HTTP server",
+              "type": "string"
+            },
+            "port": {
+              "description": "Port name or number to access on the container",
+              "oneOf": [
+                { "type": "string" },
+                { "type": "integer", "minimum": 1, "maximum": 65535 }
+              ]
+            },
+            "host": {
+              "description": "Host name to connect to, defaults to the pod IP",
+              "type": "string"
+            },
+            "scheme": {
+              "description": "Scheme to use for connecting to the host (HTTP or HTTPS)",
+              "type": "string",
+              "enum": ["HTTP", "HTTPS"]
+            },
+            "httpHeaders": {
+              "description": "Custom headers to set in the request",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "value"],
+                "properties": {
+                  "name": {
+                    "description": "Header name",
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "Header value",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "exec": {
+          "type": "object",
+          "description": "Exec probe configuration",
+          "properties": {
+            "command": {
+              "description": "Command to execute in the container",
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        "initialDelaySeconds": {
+          "description": "Number of seconds after the container has started before probes are initiated",
+          "type": "integer",
+          "minimum": 0
+        },
+        "periodSeconds": {
+          "description": "How often (in seconds) to perform the probe",
+          "type": "integer",
+          "minimum": 1
+        },
+        "timeoutSeconds": {
+          "description": "Number of seconds after which the probe times out",
+          "type": "integer",
+          "minimum": 1
+        },
+        "failureThreshold": {
+          "description": "Minimum consecutive failures for the probe to be considered failed",
+          "type": "integer",
+          "minimum": 1
+        },
+        "successThreshold": {
+          "description": "Minimum consecutive successes for the probe to be considered successful",
+          "type": "integer",
+          "minimum": 1
+        },
+        "terminationGracePeriodSeconds": {
+          "description": "Duration in seconds the pod needs to terminate gracefully upon probe failure",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "probesConfig": {
+      "type": "object",
+      "description": "Health probes configuration",
+      "properties": {
+        "readiness": {
+          "$ref": "#/$defs/probeConfig"
+        },
+        "liveness": {
+          "$ref": "#/$defs/probeConfig"
+        },
+        "startup": {
+          "$ref": "#/$defs/probeConfig"
         }
       },
       "additionalProperties": false
@@ -257,6 +375,9 @@
         "ingress": {
           "default": null,
           "$ref": "#/$defs/ingressConfig"
+        },
+        "probes": {
+          "$ref": "#/$defs/probesConfig"
         },
         "buildConfig": {
           "default": null,
